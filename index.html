@@ -373,6 +373,19 @@
                         </div>
                     </div>
 
+                    <!-- Размер оттиска: сколько целых оттисков помещается в уже посчитанную длину рулона -->
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center justify-between gap-3">
+                            <label for="inputImpressionMm" class="text-xs font-semibold uppercase tracking-wider text-slate-600">Размер оттиска</label>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <input type="number" id="inputImpressionMm" min="0" step="0.1" inputmode="decimal"
+                                    class="mono w-24 text-right font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <span class="text-xs font-semibold text-slate-600">мм</span>
+                            </div>
+                        </div>
+                        <p id="resImpressionFit" hidden class="text-[11px] text-slate-600"></p>
+                    </div>
+
                     <!-- Формат намотки: Полотно (1 сл.) / Рукав-Полурукав (2 сл.) / С фальцами (4 сл.) -->
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
                         <div class="flex justify-between items-center mb-1.5">
@@ -1295,6 +1308,7 @@
             rollWidth: 500,
             printStepMm: 250,
             printStreams: 1,
+            impressionSizeMm: 0,
             density: 0.92,
             rollGap: 0,
             palletType: '1200x800',
@@ -1503,6 +1517,39 @@
                 wholeCount: wholeSteps * k,
                 exactCount: exactSteps * k
             };
+        }
+
+        function countImpressionsInRoll(lengthMeters, impressionMm) {
+            if (!impressionMm || impressionMm <= 0 || !(lengthMeters > 0)) return null;
+            const lengthMm = lengthMeters * 1000;
+            const whole = Math.floor(lengthMm / impressionMm + 1e-9);
+            let remainderMm = lengthMm - whole * impressionMm;
+            if (!isFinite(remainderMm) || remainderMm < 0.05) remainderMm = 0;
+            return { whole, remainderMm };
+        }
+
+        function formatImpressionRemainderMm(mm) {
+            const rounded = Math.round(mm * 10) / 10;
+            if (Math.abs(rounded - Math.round(rounded)) < 1e-9) {
+                return Math.round(rounded).toLocaleString('ru-RU');
+            }
+            return rounded.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        }
+
+        function renderImpressionFit(lengthMeters) {
+            const el = document.getElementById('resImpressionFit');
+            if (!el) return;
+            const fit = countImpressionsInRoll(lengthMeters, state.impressionSizeMm);
+            if (!fit) {
+                el.textContent = '';
+                el.hidden = true;
+                return;
+            }
+            const countText = fit.whole.toLocaleString('ru-RU') + ' шт';
+            el.textContent = fit.remainderMm > 0
+                ? 'В рулоне ' + countText + ', остаток ' + formatImpressionRemainderMm(fit.remainderMm) + ' мм'
+                : 'В рулоне ' + countText;
+            el.hidden = false;
         }
 
         function calculateAll() {
@@ -2544,6 +2591,8 @@
                 if (detImpEl) detImpEl.textContent = `Шаг печати не задан`;
             }
 
+            renderImpressionFit(calc.lengthMeters);
+
             document.getElementById('resRollNetWeightMain').textContent = calc.netWeightKg.toFixed(2);
             document.getElementById('resRollGrossWeight').textContent = calc.grossWeightKg.toFixed(2);
             document.getElementById('resRollCoreSub').textContent = `${calc.coreWeightKg.toFixed(2)} кг`;
@@ -3578,6 +3627,18 @@
                 });
             }
 
+            const inputImpressionMm = document.getElementById('inputImpressionMm');
+            if (inputImpressionMm) {
+                const applyImpressionSize = () => {
+                    const raw = inputImpressionMm.value.trim();
+                    const v = parseFloat(raw);
+                    state.impressionSizeMm = (raw !== '' && !isNaN(v) && v > 0) ? v : 0;
+                    updateUI();
+                };
+                inputImpressionMm.addEventListener('input', applyImpressionSize);
+                inputImpressionMm.addEventListener('change', applyImpressionSize);
+            }
+
             document.getElementById('inputCoreWall').addEventListener('input', (e) => {
                 if (e.target.value === '') return;
                 const v = parseFloat(e.target.value);
@@ -3773,6 +3834,7 @@
                 state.rollWidth = 500;
                 state.printStepMm = 250;
                 state.printStreams = 1;
+                state.impressionSizeMm = 0;
                 state.density = 0.92;
                 state.rollGap = 0;
                 state.tiers = 3;
@@ -3794,6 +3856,7 @@
                 document.getElementById('inputThickness').value = 50;
                 document.getElementById('inputWidth').value = 500;
                 document.getElementById('inputPrintStepMm').value = 250;
+                document.getElementById('inputImpressionMm').value = '';
                 document.getElementById('selectMaterial').value = '0.92';
                 document.getElementById('inputDensity').value = 0.92;
                 document.getElementById('inputRollGap').value = 0;
