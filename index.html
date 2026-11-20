@@ -187,7 +187,7 @@
                         <div class="flex justify-between items-center mb-1.5">
                             <label for="inputRollDiam" class="text-xs font-semibold uppercase tracking-wider text-slate-600">Внешний диаметр рулона (D)</label>
                             <div class="flex items-center gap-1">
-                                <input type="number" id="inputRollDiam" min="80" max="1200" step="0.5" value="235"
+                                <input type="text" inputmode="decimal" id="inputRollDiam" min="80" max="1200" step="0.5" value="235"
                                     class="mono w-24 text-right font-bold text-blue-700 bg-white border border-slate-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 <span class="text-xs font-semibold text-slate-500">мм</span>
                             </div>
@@ -207,7 +207,7 @@
                                 <span class="text-[10px] text-slate-500">Точный двусторонний пересчет с Ø и весом</span>
                             </div>
                             <div class="flex items-center gap-1">
-                                <input type="number" id="inputRollLength" min="1" max="100000" step="1" value="734"
+                                <input type="text" inputmode="decimal" id="inputRollLength" min="0.001" max="100000" step="0.001" value="734"
                                     class="mono w-24 text-right font-bold text-blue-700 bg-white border border-blue-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 <span class="text-xs font-semibold text-slate-600">пог. м</span>
                             </div>
@@ -230,7 +230,7 @@
                                 <span class="text-[10px] text-slate-500">Вычисляет метраж и Ø под нужный вес</span>
                             </div>
                             <div class="flex items-center gap-1">
-                                <input type="number" id="inputTargetNetWeight" min="0.1" max="2000" step="0.1" value="16.88"
+                                <input type="text" inputmode="decimal" id="inputTargetNetWeight" min="0.1" max="2000" step="0.1" value="16.88"
                                     class="mono w-20 text-right font-bold text-emerald-700 bg-white border border-blue-300 rounded-lg px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 <span class="text-xs font-semibold text-slate-600">кг</span>
                             </div>
@@ -279,7 +279,7 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-1.5">
                                     <label for="inputCoreWall" class="text-slate-600 font-medium">Стенка шпули:</label>
-                                    <input type="number" id="inputCoreWall" min="0" max="35" step="0.5" value="8"
+                                    <input type="text" inputmode="decimal" id="inputCoreWall" min="0" max="35" step="0.5" value="8"
                                         class="mono w-14 text-center font-semibold bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs focus:outline-none focus:border-blue-500">
                                     <span class="text-slate-500">мм</span>
                                 </div>
@@ -290,7 +290,7 @@
                             <div class="flex items-center justify-between pt-1 border-t border-slate-200/60">
                                 <div class="flex items-center gap-1.5">
                                     <label for="inputCoreDensity" class="text-slate-600 font-medium">Плотность картона:</label>
-                                    <input type="number" id="inputCoreDensity" min="0.2" max="2.0" step="0.02" value="0.72"
+                                    <input type="text" inputmode="decimal" id="inputCoreDensity" min="0.01" max="2.0" step="0.01" value="0.72"
                                         class="mono w-14 text-center font-semibold bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs focus:outline-none focus:border-blue-500">
                                     <span class="text-slate-500">г/см³</span>
                                 </div>
@@ -306,7 +306,7 @@
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
                             <label for="inputThickness" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Толщина 1 слоя</label>
                             <div class="flex items-center gap-1.5">
-                                <input type="number" id="inputThickness" min="1" max="2000" step="0.5" value="50"
+                                <input type="text" inputmode="decimal" id="inputThickness" min="0.01" max="2000" step="0.01" value="50"
                                     class="mono w-full font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 <span class="text-xs font-semibold text-slate-500">мкм</span>
                             </div>
@@ -322,7 +322,7 @@
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
                             <label for="inputWidth" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Ширина рулона (B)</label>
                             <div class="flex items-center gap-1.5">
-                                <input type="number" id="inputWidth" min="20" max="3000" step="5" value="500"
+                                <input type="text" inputmode="decimal" id="inputWidth" min="1" max="3000" step="1" value="500"
                                     class="mono w-full font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 <span class="text-xs font-semibold text-slate-500">мм</span>
                             </div>
@@ -343,7 +343,7 @@
                                 <span class="text-[10px] text-slate-500">0 — без печати (расчет оттисков по метражу)</span>
                             </div>
                             <div class="flex items-center gap-1 shrink-0">
-                                <input type="number" id="inputPrintStepMm" min="0" max="5000" step="0.1" value="250"
+                                <input type="text" inputmode="decimal" id="inputPrintStepMm" min="0" max="5000" step="0.1" value="250"
                                     class="mono w-20 text-right font-bold text-sky-700 bg-white border border-sky-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
                                 <span class="text-xs font-semibold text-slate-600">мм</span>
                             </div>
@@ -378,7 +378,7 @@
                         <div class="flex items-center justify-between gap-3">
                             <label for="inputImpressionMm" class="text-xs font-semibold uppercase tracking-wider text-slate-600">Размер оттиска</label>
                             <div class="flex items-center gap-1 shrink-0">
-                                <input type="number" id="inputImpressionMm" min="0" step="0.1" inputmode="decimal"
+                                <input type="text" inputmode="decimal" id="inputImpressionMm" min="0" step="0.1"
                                     class="mono w-24 text-right font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 <span class="text-xs font-semibold text-slate-600">мм</span>
                             </div>
@@ -429,7 +429,7 @@
                                 <option value="custom">Своя плотность...</option>
                             </select>
                             <div class="sm:col-span-4 flex items-center gap-1">
-                                <input type="number" id="inputDensity" min="0.1" max="5.0" step="0.01" value="0.92"
+                                <input type="text" inputmode="decimal" id="inputDensity" min="0.01" max="5.0" step="0.01" value="0.92"
                                     class="mono w-full text-right font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
                                 <span class="text-[11px] font-semibold text-slate-500 shrink-0">г/см³</span>
                             </div>
@@ -536,7 +536,7 @@
                                 <span class="text-[10px] text-slate-400">Дистанция между соседними рулонами в ряду</span>
                             </div>
                             <div class="flex items-center gap-1">
-                                <input type="number" id="inputRollGap" min="0" max="200" step="1" value="0"
+                                <input type="text" inputmode="decimal" id="inputRollGap" min="0" max="200" step="1" value="0"
                                     class="mono w-16 text-right font-bold text-indigo-700 bg-white border border-slate-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                                 <span class="text-xs font-semibold text-slate-500">мм</span>
                             </div>
@@ -559,7 +559,7 @@
                             <label for="inputTiers" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Ярусов по высоте</label>
                             <div class="flex items-center gap-1">
                                 <button type="button" onclick="changeTiers(-1)" class="w-8 h-8 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 cursor-pointer">-</button>
-                                <input type="number" id="inputTiers" min="1" max="15" step="1" value="3"
+                                <input type="text" inputmode="decimal" id="inputTiers" min="1" max="15" step="1" value="3"
                                     class="mono w-full text-center font-bold text-slate-900 bg-white border border-slate-300 rounded-lg py-1 text-sm">
                                 <button type="button" onclick="changeTiers(1)" class="w-8 h-8 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-bold text-slate-700 cursor-pointer">+</button>
                             </div>
@@ -568,7 +568,7 @@
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
                             <label for="inputPalletWeight" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Вес пустого поддона</label>
                             <div class="flex items-center gap-1.5">
-                                <input type="number" id="inputPalletWeight" min="0" max="100" step="0.5" value="22"
+                                <input type="text" inputmode="decimal" id="inputPalletWeight" min="0" max="100" step="0.5" value="22"
                                     class="mono w-full font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-sm">
                                 <span class="text-xs font-semibold text-slate-500">кг</span>
                             </div>
@@ -592,7 +592,7 @@
                             <div class="bg-white p-2 rounded-lg border border-indigo-100">
                                 <label for="inputMaxHeightLimit" class="block text-[10px] font-semibold uppercase text-slate-500 mb-0.5">Макс. высота паллеты</label>
                                 <div class="flex items-center gap-1">
-                                    <input type="number" id="inputMaxHeightLimit" min="500" max="3500" step="50" value="1800"
+                                    <input type="text" inputmode="decimal" id="inputMaxHeightLimit" min="500" max="3500" step="50" value="1800"
                                         class="mono w-full font-bold text-slate-800 text-xs sm:text-sm focus:outline-none">
                                     <span class="text-[11px] text-slate-400 font-semibold">мм</span>
                                 </div>
@@ -600,7 +600,7 @@
                             <div class="bg-white p-2 rounded-lg border border-indigo-100">
                                 <label for="inputMaxWeightLimit" class="block text-[10px] font-semibold uppercase text-slate-500 mb-0.5">Макс. вес брутто</label>
                                 <div class="flex items-center gap-1">
-                                    <input type="number" id="inputMaxWeightLimit" min="100" max="3000" step="50" value="1000"
+                                    <input type="text" inputmode="decimal" id="inputMaxWeightLimit" min="100" max="3000" step="50" value="1000"
                                         class="mono w-full font-bold text-slate-800 text-xs sm:text-sm focus:outline-none">
                                     <span class="text-[11px] text-slate-400 font-semibold">кг</span>
                                 </div>
@@ -626,7 +626,7 @@
                             <div class="bg-white p-2 rounded-lg border border-slate-200">
                                 <label for="inputSheetThickness" class="block text-[10px] text-slate-500 font-medium">Толщина листа</label>
                                 <div class="flex items-center gap-1 mt-0.5">
-                                    <input type="number" id="inputSheetThickness" min="0" max="30" step="1" value="4"
+                                    <input type="text" inputmode="decimal" id="inputSheetThickness" min="0" max="30" step="1" value="4"
                                         class="mono w-full font-bold text-slate-800 text-xs focus:outline-none">
                                     <span class="text-[10px] text-slate-400">мм</span>
                                 </div>
@@ -634,7 +634,7 @@
                             <div class="bg-white p-2 rounded-lg border border-slate-200">
                                 <label for="inputSheetWeight" class="block text-[10px] text-slate-500 font-medium">Вес 1 прокладки</label>
                                 <div class="flex items-center gap-1 mt-0.5">
-                                    <input type="number" id="inputSheetWeight" min="0" max="20" step="0.1" value="0.8"
+                                    <input type="text" inputmode="decimal" id="inputSheetWeight" min="0" max="20" step="0.1" value="0.8"
                                         class="mono w-full font-bold text-slate-800 text-xs focus:outline-none">
                                     <span class="text-[10px] text-slate-400">кг</span>
                                 </div>
@@ -642,7 +642,7 @@
                             <div class="bg-white p-2 rounded-lg border border-slate-200">
                                 <label for="inputWrapWeight" class="block text-[10px] text-slate-500 font-medium">Стрейч + уголки</label>
                                 <div class="flex items-center gap-1 mt-0.5">
-                                    <input type="number" id="inputWrapWeight" min="0" max="30" step="0.1" value="1.5"
+                                    <input type="text" inputmode="decimal" id="inputWrapWeight" min="0" max="30" step="0.1" value="1.5"
                                         class="mono w-full font-bold text-slate-800 text-xs focus:outline-none">
                                     <span class="text-[10px] text-slate-400">кг</span>
                                 </div>
@@ -855,7 +855,7 @@
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-amber-950 mb-2">Целевой объем заказа</label>
                             <div class="flex gap-2">
-                                <input type="number" id="inputBatchValue" min="1" step="10" value="3000"
+                                <input type="text" inputmode="decimal" id="inputBatchValue" min="1" step="10" value="3000"
                                     class="mono w-full font-extrabold text-lg text-slate-900 bg-white border border-amber-300 rounded-xl px-3 py-1.5 focus:ring-2 focus:ring-amber-500 focus:outline-none">
                                 <select id="selectBatchUnit" class="bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-amber-500 focus:outline-none shrink-0">
                                     <option value="kg" selected>кг (чистый вес)</option>
@@ -963,7 +963,7 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Макс. диаметр (мм)</label>
-                            <input type="number" id="modalMaxDiam" min="80" max="1200" value="300" oninput="updateModalPreview()"
+                            <input type="text" inputmode="decimal" id="modalMaxDiam" min="80" max="1200" value="300" oninput="updateModalPreview()"
                                 class="mono w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div>
@@ -1043,12 +1043,12 @@
                         <div class="grid grid-cols-2 gap-2">
                             <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1">
                                 <span class="text-slate-400 font-semibold">X:</span>
-                                <input type="number" id="inputSelectedRollX" step="1" oninput="updateSelectedRollFromInputs()" class="mono w-full text-right font-bold text-slate-800 focus:outline-none">
+                                <input type="text" inputmode="decimal" id="inputSelectedRollX" step="1" oninput="updateSelectedRollFromInputs()" class="mono w-full text-right font-bold text-slate-800 focus:outline-none">
                                 <span class="text-[10px] text-slate-400">мм</span>
                             </div>
                             <div class="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1">
                                 <span class="text-slate-400 font-semibold">Y:</span>
-                                <input type="number" id="inputSelectedRollY" step="1" oninput="updateSelectedRollFromInputs()" class="mono w-full text-right font-bold text-slate-800 focus:outline-none">
+                                <input type="text" inputmode="decimal" id="inputSelectedRollY" step="1" oninput="updateSelectedRollFromInputs()" class="mono w-full text-right font-bold text-slate-800 focus:outline-none">
                                 <span class="text-[10px] text-slate-400">мм</span>
                             </div>
                         </div>
@@ -1279,10 +1279,10 @@
                 { id: 'std_1',  title: 'Диаметр рулона до 800 мм', subtitle: '1 рулон по центру',       maxDiam: 800, rollsCount: 1,  shifted: false, pallet: '1200x800', isStandard: false, points: buildCenteredNormalized(pts1, 800, 1200, 800) },
                 { id: 'sq_25',  title: 'До 240 мм (1200×1200)',    subtitle: '25 рулонов (5×5)',        maxDiam: 240, rollsCount: 25, shifted: false, pallet: '1200x1200', isStandard: false, points: buildCenteredNormalized(pts25_sq, 240, 1200, 1200) },
                 { id: 'sq_16',  title: 'До 300 мм (1200×1200)',    subtitle: '16 рулонов (4×4)',        maxDiam: 300, rollsCount: 16, shifted: false, pallet: '1200x1200', isStandard: false, points: buildCenteredNormalized(pts16_sq, 300, 1200, 1200) },
-                { id: 'ind_12', title: 'До 300 мм (1100×1200)',    subtitle: '12 рулонов (4×3)',        maxDiam: 300, rollsCount: 12, shifted: false, pallet: '1100x1200', isStandard: false, points: buildCenteredNormalized(pts12_ind, 300, 1200, 1100) },
-                { id: 'sq_9',   title: 'До 365 мм (1100/1200)',    subtitle: '9 рулонов (3×3)',         maxDiam: 365, rollsCount: 9,  shifted: false, pallet: '1100x1200', isStandard: false, points: buildCenteredNormalized(pts9_sq, 365, 1200, 1100) },
-                { id: 'ind_6',  title: 'До 400 мм (1100×1200)',    subtitle: '6 рулонов (3×2)',         maxDiam: 400, rollsCount: 6,  shifted: false, pallet: '1100x1200', isStandard: false, points: buildCenteredNormalized(pts6_ind, 400, 1200, 1100) },
-                { id: 'sq_4',   title: 'До 550 мм (1100/1200)',    subtitle: '4 рулона (2×2)',         maxDiam: 550, rollsCount: 4,  shifted: false, pallet: '1100x1200', isStandard: false, points: buildCenteredNormalized(pts4_sq, 550, 1200, 1100) }
+                { id: 'ind_12', title: 'До 300 мм (1100×1200)',    subtitle: '12 рулонов (4×3)',        maxDiam: 300, rollsCount: 12, shifted: false, pallet: '1100x1200', isStandard: false, points: buildCenteredNormalized(pts12_ind, 300, 1100, 1200) },
+                { id: 'sq_9',   title: 'До 365 мм (1100/1200)',    subtitle: '9 рулонов (3×3)',         maxDiam: 365, rollsCount: 9,  shifted: false, pallet: '1100x1200', isStandard: false, points: buildCenteredNormalized(pts9_sq, 365, 1100, 1200) },
+                { id: 'ind_6',  title: 'До 400 мм (1100×1200)',    subtitle: '6 рулонов (3×2)',         maxDiam: 400, rollsCount: 6,  shifted: false, pallet: '1100x1200', isStandard: false, points: buildCenteredNormalized(pts6_ind, 400, 1100, 1200) },
+                { id: 'sq_4',   title: 'До 550 мм (1100/1200)',    subtitle: '4 рулона (2×2)',         maxDiam: 550, rollsCount: 4,  shifted: false, pallet: '1100x1200', isStandard: false, points: buildCenteredNormalized(pts4_sq, 550, 1100, 1200) }
             ];
         }
 
@@ -1291,7 +1291,7 @@
          ***********************************************************************/
         const PALLET_DIMENSIONS = {
             '1200x800':  { w: 1200, h: 800,  name: '1200 × 800 мм (EUR)', defaultWeight: 22 },
-            '1100x1200': { w: 1200, h: 1100, name: '1100 × 1200 мм (FIN/IND)', defaultWeight: 25 },
+            '1100x1200': { w: 1100, h: 1200, name: '1100 × 1200 мм (FIN/IND)', defaultWeight: 25 },
             '1200x1200': { w: 1200, h: 1200, name: '1200 × 1200 мм (Квадрат)', defaultWeight: 27 }
         };
 
@@ -1552,26 +1552,48 @@
             el.hidden = false;
         }
 
+        function positiveOr(value, fallback) {
+            const n = Number(value);
+            return n > 0 ? n : fallback;
+        }
+
+        function filmLengthMeters(D, dCore, effectiveH) {
+            if (!(D > dCore) || !(effectiveH > 0)) return 0;
+            return (Math.PI * (D * D - dCore * dCore)) / (4 * effectiveH);
+        }
+
+        function formatRollMeters(meters) {
+            const shown = Math.round(Number(meters) * 1000) / 1000;
+            if (!Number.isFinite(shown)) return '0,000';
+            return shown.toLocaleString('ru-RU', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+        }
+
+        function orderRollCount(target, perUnit) {
+            if (!(target > 0) || !(perUnit > 0)) return 0;
+            const n = Math.ceil(target / perUnit - 1e-9);
+            return n > 0 ? n : 0;
+        }
+
         function calculateAll() {
             const d_inner = state.coreInnerDiam;
-            const wall = Math.max(0, state.coreWall);
+            const wall = state.coreWall > 0 ? state.coreWall : 0;
             const d_core = d_inner + 2 * wall;
-            const D = Math.max(d_core + 1, state.rollDiam);
-            const h_um = Math.max(0.5, state.thicknessMicrons);
+            const D = state.rollDiam;
+            const h_um = positiveOr(state.thicknessMicrons, 0);
             const layers = Math.max(1, state.windingLayers);
             const effective_h_um = h_um * layers;
-            const B = Math.max(10, state.rollWidth);
-            const rho = Math.max(0.1, state.density);
-            const coreRho = Math.max(0.1, state.coreDensity);
-            const gap = Math.max(0, state.rollGap);
+            const B = positiveOr(state.rollWidth, 0);
+            const rho = positiveOr(state.density, 0);
+            const coreRho = positiveOr(state.coreDensity, 0);
+            const gap = state.rollGap > 0 ? state.rollGap : 0;
 
             let lengthMeters = 0;
             let turnsCount = 0;
             if (state.exactLockedLength !== null && state.exactLockedLength > 0) {
                 lengthMeters = state.exactLockedLength;
-                turnsCount = Math.round(((D - d_core) / 2 * 1000) / effective_h_um);
-            } else if (D > d_core) {
-                lengthMeters = (Math.PI * (D * D - d_core * d_core)) / (4 * effective_h_um);
+                turnsCount = effective_h_um > 0 ? Math.round(((D - d_core) / 2 * 1000) / effective_h_um) : 0;
+            } else if (D > d_core && effective_h_um > 0) {
+                lengthMeters = filmLengthMeters(D, d_core, effective_h_um);
                 turnsCount = Math.round(((D - d_core) / 2 * 1000) / effective_h_um);
             }
             state.rollLength = lengthMeters;
@@ -2432,17 +2454,15 @@
             let totalRollsNeeded = 0;
             if (calc.netWeightKg > 0 && calc.lengthMeters > 0 && calc.areaSqM > 0) {
                 if (unit === 'kg') {
-                    totalRollsNeeded = Math.ceil((targetVal / calc.netWeightKg) - 1e-9);
+                    totalRollsNeeded = orderRollCount(targetVal, calc.netWeightKg);
                 } else if (unit === 'rolls') {
-                    totalRollsNeeded = Math.ceil(targetVal);
+                    totalRollsNeeded = targetVal > 0 ? Math.ceil(targetVal) : 0;
                 } else if (unit === 'm') {
-                    totalRollsNeeded = Math.ceil((targetVal / calc.lengthMeters) - 1e-9);
+                    totalRollsNeeded = orderRollCount(targetVal, calc.lengthMeters);
                 } else if (unit === 'sqm') {
-                    totalRollsNeeded = Math.ceil((targetVal / calc.areaSqM) - 1e-9);
+                    totalRollsNeeded = orderRollCount(targetVal, calc.areaSqM);
                 } else if (unit === 'impr') {
-                    if (calc.impPerRoll.wholeCount > 0) {
-                        totalRollsNeeded = Math.ceil((targetVal / calc.impPerRoll.wholeCount) - 1e-9);
-                    }
+                    totalRollsNeeded = orderRollCount(targetVal, calc.impPerRoll.wholeCount);
                 }
             }
 
@@ -2536,7 +2556,7 @@
 
             const inputRollLengthEl = document.getElementById('inputRollLength');
             if (!skipLengthInputSync && inputRollLengthEl && document.activeElement !== inputRollLengthEl) {
-                inputRollLengthEl.value = Math.round(calc.lengthMeters * 10) / 10;
+                inputRollLengthEl.value = Math.round(calc.lengthMeters * 1000) / 1000;
             }
 
             const inputTargetNetWeightEl = document.getElementById('inputTargetNetWeight');
@@ -2570,7 +2590,7 @@
             const layerBadge = calc.layers > 1 ? ` ×${calc.layers}сл` : '';
             document.getElementById('resRollSpecSub').textContent = `${state.rollWidth}мм × ${state.thicknessMicrons}мкм${layerBadge}`;
 
-            document.getElementById('resRollLength').textContent = Math.round(calc.lengthMeters).toLocaleString('ru-RU');
+            document.getElementById('resRollLength').textContent = formatRollMeters(calc.lengthMeters);
 
             const impLabelEl = document.getElementById('resRollImpressionsLabel');
             const impValEl = document.getElementById('resRollImpressions');
@@ -2653,32 +2673,41 @@
          * 6. ОБРАБОТЧИКИ СОБЫТИЙ И ПЕРЕКЛЮЧАТЕЛИ
          ***********************************************************************/
         function setLengthAndRecalcDiam(lengthMetersVal, skipLengthInputSync = false, skipWeightInputSync = false) {
-            const L = Math.max(0.5, lengthMetersVal);
-            state.exactLockedLength = L;
+            let L = Number(lengthMetersVal);
+            if (!(L > 0)) L = 0;
+            const d_core = state.coreInnerDiam + 2 * (state.coreWall > 0 ? state.coreWall : 0);
+            const effective_h_um = positiveOr(state.thicknessMicrons, 0) * Math.max(1, state.windingLayers);
+            const minD = Math.round((d_core + 1) * 10) / 10;
+            let preciseD = Math.max(minD, state.rollDiam || minD);
+            let capped = false;
+            if (L > 0 && effective_h_um > 0) {
+                const newD = Math.sqrt((4 * effective_h_um * L) / Math.PI + d_core * d_core);
+                const roundedD = Math.round(newD * 10) / 10;
+                const hitsLimit = roundedD > 1200 || roundedD < minD;
+                if (hitsLimit && roundedD < minD && skipLengthInputSync) return;
+                preciseD = Math.min(1200, Math.max(minD, roundedD));
+                capped = Math.abs(preciseD - roundedD) > 0.001;
+                if (capped) L = filmLengthMeters(preciseD, d_core, effective_h_um);
+            }
+            state.exactLockedLength = L > 0 ? L : null;
             state.rollLength = L;
-
-            const d_core = state.coreInnerDiam + 2 * Math.max(0, state.coreWall);
-            const effective_h_um = Math.max(0.5, state.thicknessMicrons) * Math.max(1, state.windingLayers);
-
-            const newD = Math.sqrt((4 * effective_h_um * L) / Math.PI + d_core * d_core);
-            const preciseD = Math.min(1200, Math.max(d_core + 1, Math.round(newD * 10) / 10));
-
             state.rollDiam = preciseD;
             document.getElementById('inputRollDiam').value = preciseD;
             document.getElementById('sliderRollDiam').value = Math.min(DIAM_SLIDER_MAX, Math.max(DIAM_SLIDER_MIN, Math.round(preciseD)));
-            if (!skipLengthInputSync) {
-                document.getElementById('inputRollLength').value = Math.round(L * 10) / 10;
+            const lenEl = document.getElementById('inputRollLength');
+            if (lenEl && (!skipLengthInputSync || capped)) {
+                lenEl.value = Math.round(L * 1000) / 1000;
             }
-            updateUI(skipLengthInputSync, skipWeightInputSync);
+            updateUI(skipLengthInputSync && !capped, skipWeightInputSync && !capped);
         }
 
         function setNetWeightAndRecalc(targetNetKg) {
-            const m_net = Math.max(0.05, targetNetKg);
-            const h_um = Math.max(0.5, state.thicknessMicrons);
+            const m_net = Number(targetNetKg);
+            const h_um = positiveOr(state.thicknessMicrons, 0);
             const layers = Math.max(1, state.windingLayers);
-            const B = Math.max(10, state.rollWidth);
-            const rho = Math.max(0.1, state.density);
-
+            const B = positiveOr(state.rollWidth, 0);
+            const rho = positiveOr(state.density, 0);
+            if (!(m_net > 0) || !(h_um > 0) || !(B > 0) || !(rho > 0)) return;
             const requiredLengthM = (m_net * 1000000) / (B * layers * h_um * rho);
             setLengthAndRecalcDiam(requiredLengthM, false, true);
         }
@@ -3543,28 +3572,131 @@
             const inputRollDiam = document.getElementById('inputRollDiam');
             const sliderRollDiam = document.getElementById('sliderRollDiam');
 
-            inputRollDiam.addEventListener('input', (e) => {
-                const raw = e.target.value;
-                if (raw === '') return;
-                const v = parseFloat(raw);
-                if (!isNaN(v) && v >= 50 && v <= 1500) {
+            function parseUserNumber(raw) {
+                if (raw == null) return NaN;
+                const s = String(raw).trim().replace(/[\s\u00a0\u202f]/g, '').replace(',', '.');
+                if (s === '' || s === '-' || s === '+' || s === '.' || s === '-.' || s === '+.') return NaN;
+                const n = Number(s);
+                return Number.isFinite(n) ? n : NaN;
+            }
+
+            function numberStillTyping(raw) {
+                const s = String(raw).trim().replace(',', '.');
+                return s === '' || s === '-' || s === '+' || s === '.' || s === '-.' || s.endsWith('.');
+            }
+
+            function writeInputValue(el, next, caret) {
+                const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+                setter.call(el, next);
+                if (caret != null) {
+                    try { el.setSelectionRange(caret, caret); } catch (err) { /* курсор недоступен */ }
+                }
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            function bindDecimalComma(el) {
+                if (!el || el.dataset.decimalComma === '1') return;
+                el.dataset.decimalComma = '1';
+                el.addEventListener('keydown', (e) => {
+                    if (e.key !== ',' && e.key !== 'Decimal') return;
+                    e.preventDefault();
+                    const start = el.selectionStart == null ? el.value.length : el.selectionStart;
+                    const end = el.selectionEnd == null ? el.value.length : el.selectionEnd;
+                    const next = el.value.slice(0, start) + '.' + el.value.slice(end);
+                    if ((next.match(/\./g) || []).length > 1) return;
+                    writeInputValue(el, next, start + 1);
+                });
+                el.addEventListener('beforeinput', (e) => {
+                    if (!e.data || !String(e.data).includes(',')) return;
+                    e.preventDefault();
+                    if (e.data === ',') return;
+                    const start = el.selectionStart == null ? el.value.length : el.selectionStart;
+                    const end = el.selectionEnd == null ? el.value.length : el.selectionEnd;
+                    const chunk = String(e.data).replace(/,/g, '.');
+                    writeInputValue(el, el.value.slice(0, start) + chunk + el.value.slice(end), start + chunk.length);
+                });
+            }
+
+            document.querySelectorAll('input[inputmode="decimal"]').forEach(bindDecimalComma);
+
+            function bindCheckedNumber(el, opts) {
+                if (!el) return;
+                bindDecimalComma(el);
+                const minOf = () => (typeof opts.min === 'function' ? opts.min() : opts.min);
+                const maxOf = () => (opts.max == null ? null : (typeof opts.max === 'function' ? opts.max() : opts.max));
+                const read = () => (opts.integer ? parseInt(el.value, 10) : parseUserNumber(el.value));
+                const inRange = (v) => {
+                    if (!Number.isFinite(v)) return false;
+                    if (v < minOf()) return false;
+                    const max = maxOf();
+                    if (max != null && v > max) return false;
+                    if (!opts.allowZero && v === 0) return false;
+                    return true;
+                };
+                const revert = () => {
+                    const shown = opts.display();
+                    el.value = shown === '' || shown == null ? '' : shown;
+                };
+                const accept = (v, kind) => {
+                    const max = maxOf();
+                    if (opts.capHigh && max != null && v > max) v = max;
+                    opts.onValid(v, kind);
+                };
+                const handle = (kind) => {
+                    const raw = String(el.value).trim();
+                    if (raw === '' && opts.emptyIsZero) {
+                        opts.onValid(0);
+                        return;
+                    }
+                    if (kind === 'input' && numberStillTyping(el.value)) return;
+                    const v = read();
+                    if (inRange(v)) {
+                        accept(v, kind);
+                        return;
+                    }
+                    const negative = Number.isFinite(v) && v < 0;
+                    const bareZero = Number.isFinite(v) && v === 0 && minOf() >= 1;
+                    if (kind === 'change' || negative || bareZero) {
+                        if (opts.capHigh && Number.isFinite(v) && maxOf() != null && v > maxOf()) {
+                            accept(v, kind);
+                            return;
+                        }
+                        revert();
+                    }
+                };
+                el.addEventListener('input', () => handle('input'));
+                el.addEventListener('change', () => handle('change'));
+            }
+
+            function coreOuterMinDiam() {
+                const wall = state.coreWall > 0 ? state.coreWall : 0;
+                return state.coreInnerDiam + 2 * wall + 1;
+            }
+
+            function applyThicknessLike(assign) {
+                return (v) => {
+                    assign(v);
+                    if (state.lockMode === 'length') {
+                        const targetLen = state.exactLockedLength || state.rollLength;
+                        setLengthAndRecalcDiam(targetLen, true);
+                    } else {
+                        state.exactLockedLength = null;
+                        updateUI();
+                    }
+                };
+            }
+
+            bindCheckedNumber(inputRollDiam, {
+                min: coreOuterMinDiam,
+                max: 1200,
+                capHigh: true,
+                display: () => state.rollDiam,
+                onValid: (v) => {
                     state.exactLockedLength = null;
                     state.rollDiam = v;
                     sliderRollDiam.value = Math.min(DIAM_SLIDER_MAX, Math.max(DIAM_SLIDER_MIN, Math.round(v)));
                     updateUI();
                 }
-            });
-
-            inputRollDiam.addEventListener('change', (e) => {
-                const d_core = state.coreInnerDiam + 2 * Math.max(0, state.coreWall);
-                let v = parseFloat(e.target.value);
-                if (isNaN(v) || v < d_core + 1) v = d_core + 1;
-                if (v > 1200) v = 1200;
-                e.target.value = v;
-                state.exactLockedLength = null;
-                state.rollDiam = v;
-                sliderRollDiam.value = Math.min(DIAM_SLIDER_MAX, Math.max(DIAM_SLIDER_MIN, Math.round(v)));
-                updateUI();
             });
 
             sliderRollDiam.addEventListener('input', (e) => {
@@ -3576,121 +3708,93 @@
             });
 
             const inputRollLength = document.getElementById('inputRollLength');
-            inputRollLength.addEventListener('input', (e) => {
-                const raw = e.target.value;
-                if (raw === '') return;
-                const v = parseFloat(raw);
-                if (!isNaN(v) && v > 0) {
-                    setLengthAndRecalcDiam(v, true, false);
-                }
-            });
-            inputRollLength.addEventListener('change', (e) => {
-                let v = parseFloat(e.target.value);
-                if (isNaN(v) || v < 1) v = 1;
-                e.target.value = v;
-                setLengthAndRecalcDiam(v, false, false);
+            bindCheckedNumber(inputRollLength, {
+                min: 0.001,
+                max: 100000,
+                capHigh: true,
+                display: () => Math.round((state.exactLockedLength || state.rollLength || 0) * 1000) / 1000,
+                onValid: (v, kind) => setLengthAndRecalcDiam(v, kind === 'input', false)
             });
 
             const inputTargetNetWeight = document.getElementById('inputTargetNetWeight');
-            if (inputTargetNetWeight) {
-                inputTargetNetWeight.addEventListener('input', (e) => {
-                    const raw = e.target.value;
-                    if (raw === '') return;
-                    const v = parseFloat(raw);
-                    if (!isNaN(v) && v > 0) {
-                        setNetWeightAndRecalc(v);
-                    }
-                });
-                inputTargetNetWeight.addEventListener('change', (e) => {
-                    let v = parseFloat(e.target.value);
-                    if (isNaN(v) || v < 0.05) v = 0.05;
-                    setNetWeightAndRecalc(v);
-                });
-            }
+            bindCheckedNumber(inputTargetNetWeight, {
+                min: 0.01,
+                max: 2000,
+                capHigh: true,
+                display: () => document.getElementById('resRollNetWeightMain').textContent,
+                onValid: (v) => setNetWeightAndRecalc(v)
+            });
 
-            const inputPrintStepMm = document.getElementById('inputPrintStepMm');
-            if (inputPrintStepMm) {
-                inputPrintStepMm.addEventListener('input', (e) => {
-                    if (e.target.value === '') return;
-                    const v = parseFloat(e.target.value);
-                    if (!isNaN(v) && v >= 0) {
-                        state.printStepMm = v;
-                        updateUI();
-                    }
-                });
-                inputPrintStepMm.addEventListener('change', (e) => {
-                    let v = parseFloat(e.target.value);
-                    if (isNaN(v) || v < 0) v = 0;
-                    e.target.value = v;
-                    state.printStepMm = v;
+            bindCheckedNumber(document.getElementById('inputPrintStepMm'), {
+                min: 0,
+                max: 5000,
+                allowZero: true,
+                emptyIsZero: true,
+                capHigh: true,
+                display: () => state.printStepMm,
+                onValid: (v) => {
+                    state.printStepMm = v > 0 ? v : 0;
                     updateUI();
-                });
-            }
-
-            const inputImpressionMm = document.getElementById('inputImpressionMm');
-            if (inputImpressionMm) {
-                const applyImpressionSize = () => {
-                    const raw = inputImpressionMm.value.trim();
-                    const v = parseFloat(raw);
-                    state.impressionSizeMm = (raw !== '' && !isNaN(v) && v > 0) ? v : 0;
-                    updateUI();
-                };
-                inputImpressionMm.addEventListener('input', applyImpressionSize);
-                inputImpressionMm.addEventListener('change', applyImpressionSize);
-            }
-
-            document.getElementById('inputCoreWall').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 0) {
-                    state.coreWall = v;
-                    if (state.lockMode === 'length') {
-                        const targetLen = state.exactLockedLength || state.rollLength;
-                        setLengthAndRecalcDiam(targetLen, true);
-                    } else {
-                        state.exactLockedLength = null;
-                        updateUI();
-                    }
                 }
             });
 
-            document.getElementById('inputCoreDensity').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v > 0) {
+            bindCheckedNumber(document.getElementById('inputImpressionMm'), {
+                min: 0,
+                allowZero: true,
+                emptyIsZero: true,
+                display: () => (state.impressionSizeMm > 0 ? state.impressionSizeMm : ''),
+                onValid: (v) => {
+                    state.impressionSizeMm = v > 0 ? v : 0;
+                    updateUI();
+                }
+            });
+
+            bindCheckedNumber(document.getElementById('inputCoreWall'), {
+                min: 0,
+                max: 35,
+                allowZero: true,
+                capHigh: true,
+                display: () => state.coreWall,
+                onValid: applyThicknessLike((v) => { state.coreWall = v; })
+            });
+
+            bindCheckedNumber(document.getElementById('inputCoreDensity'), {
+                min: 0.01,
+                max: 2,
+                capHigh: true,
+                display: () => state.coreDensity,
+                onValid: (v) => {
                     state.coreDensity = v;
                     updateUI();
                 }
             });
 
-            document.getElementById('inputThickness').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v > 0) {
-                    state.thicknessMicrons = v;
-                    if (state.lockMode === 'length') {
-                        const targetLen = state.exactLockedLength || state.rollLength;
-                        setLengthAndRecalcDiam(targetLen, true);
-                    } else {
-                        state.exactLockedLength = null;
-                        updateUI();
-                    }
-                }
+            bindCheckedNumber(document.getElementById('inputThickness'), {
+                min: 0.01,
+                max: 2000,
+                capHigh: true,
+                display: () => state.thicknessMicrons,
+                onValid: applyThicknessLike((v) => { state.thicknessMicrons = v; })
             });
 
-            document.getElementById('inputRollGap').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 0) {
+            bindCheckedNumber(document.getElementById('inputRollGap'), {
+                min: 0,
+                max: 200,
+                allowZero: true,
+                capHigh: true,
+                display: () => state.rollGap,
+                onValid: (v) => {
                     state.rollGap = v;
                     updateUI();
                 }
             });
 
-            document.getElementById('inputWidth').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v > 0) {
+            bindCheckedNumber(document.getElementById('inputWidth'), {
+                min: 1,
+                max: 3000,
+                capHigh: true,
+                display: () => state.rollWidth,
+                onValid: (v) => {
                     state.rollWidth = v;
                     updateUI();
                 }
@@ -3708,47 +3812,59 @@
                 }
             });
 
-            inputDensity.addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v > 0) {
+            bindCheckedNumber(inputDensity, {
+                min: 0.01,
+                max: 5,
+                capHigh: true,
+                display: () => state.density,
+                onValid: (v) => {
                     state.density = v;
                     selectMaterial.value = 'custom';
                     updateUI();
                 }
             });
 
-            document.getElementById('inputTiers').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseInt(e.target.value, 10);
-                if (!isNaN(v) && v >= 1) {
+            bindCheckedNumber(document.getElementById('inputTiers'), {
+                min: 1,
+                max: 20,
+                integer: true,
+                capHigh: true,
+                display: () => state.tiers,
+                onValid: (v) => {
                     state.tiers = v;
                     updateUI();
                 }
             });
 
-            document.getElementById('inputPalletWeight').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 0) {
+            bindCheckedNumber(document.getElementById('inputPalletWeight'), {
+                min: 0,
+                max: 100,
+                allowZero: true,
+                capHigh: true,
+                display: () => state.palletWoodWeight,
+                onValid: (v) => {
                     state.palletWoodWeight = v;
                     updateUI();
                 }
             });
 
-            document.getElementById('inputMaxHeightLimit').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 300) {
+            bindCheckedNumber(document.getElementById('inputMaxHeightLimit'), {
+                min: 300,
+                max: 3500,
+                capHigh: true,
+                display: () => state.maxHeightLimitMm,
+                onValid: (v) => {
                     state.maxHeightLimitMm = v;
                     updateUI();
                 }
             });
 
-            document.getElementById('inputMaxWeightLimit').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 50) {
+            bindCheckedNumber(document.getElementById('inputMaxWeightLimit'), {
+                min: 50,
+                max: 3000,
+                capHigh: true,
+                display: () => state.maxWeightLimitKg,
+                onValid: (v) => {
                     state.maxWeightLimitKg = v;
                     updateUI();
                 }
@@ -3761,38 +3877,49 @@
                 updateUI();
             });
 
-            document.getElementById('inputSheetThickness').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 0) {
+            bindCheckedNumber(document.getElementById('inputSheetThickness'), {
+                min: 0,
+                max: 30,
+                allowZero: true,
+                capHigh: true,
+                display: () => state.interlayerThickMm,
+                onValid: (v) => {
                     state.interlayerThickMm = v;
                     updateUI();
                 }
             });
 
-            document.getElementById('inputSheetWeight').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 0) {
+            bindCheckedNumber(document.getElementById('inputSheetWeight'), {
+                min: 0,
+                max: 20,
+                allowZero: true,
+                capHigh: true,
+                display: () => state.interlayerWeightKg,
+                onValid: (v) => {
                     state.interlayerWeightKg = v;
                     updateUI();
                 }
             });
 
-            document.getElementById('inputWrapWeight').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 0) {
+            bindCheckedNumber(document.getElementById('inputWrapWeight'), {
+                min: 0,
+                max: 30,
+                allowZero: true,
+                capHigh: true,
+                display: () => state.stretchWrapWeightKg,
+                onValid: (v) => {
                     state.stretchWrapWeightKg = v;
                     updateUI();
                 }
             });
 
-            document.getElementById('inputBatchValue').addEventListener('input', (e) => {
-                if (e.target.value === '') return;
-                const v = parseFloat(e.target.value);
-                if (!isNaN(v) && v >= 0) {
-                    state.batchOrderValue = v;
+            bindCheckedNumber(document.getElementById('inputBatchValue'), {
+                min: 0,
+                allowZero: true,
+                emptyIsZero: true,
+                display: () => state.batchOrderValue,
+                onValid: (v) => {
+                    state.batchOrderValue = v > 0 ? v : 0;
                     updateUI();
                 }
             });
