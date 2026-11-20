@@ -3,399 +3,1993 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор площади рулонов и схем паллетирования</title>
+    <title>RollCalc Pro — Калькулятор рулонов и паллетирования</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
-            color: #0f172a;
-        }
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        /* Кастомный ползунок с динамической заливкой и точной центровкой по бегунку (18px) */
-        input[type="range"].diam-slider {
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Range Slider Styling */
+        input[type=range] {
             -webkit-appearance: none;
-            appearance: none;
+            background: transparent;
+        }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 8px;
-            border-radius: 999px;
-            outline: none;
             cursor: pointer;
-            position: relative;
-            z-index: 2;
-        }
-        input[type="range"].diam-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #2563eb;
-            cursor: pointer;
-            border: 2.5px solid #ffffff;
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
-            transition: transform 0.12s ease, background-color 0.12s ease;
-        }
-        input[type="range"].diam-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.16);
-            background: #1d4ed8;
-        }
-        input[type="range"].diam-slider::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #2563eb;
-            cursor: pointer;
-            border: 2.5px solid #ffffff;
-            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
-            transition: transform 0.12s ease, background-color 0.12s ease;
-        }
-        input[type="range"].diam-slider::-moz-range-track {
-            background: transparent;
-            height: 8px;
-        }
-
-        /* Контейнер линейной шкалы с компенсацией радиуса бегунка (9px) */
-        .diam-ticks-wrapper {
-            position: relative;
-            height: 24px;
-            margin-left: 9px;
-            margin-right: 9px;
-            margin-top: 4px;
-            user-select: none;
-        }
-        .diam-tick-item {
-            position: absolute;
-            top: 0;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            padding: 0 2px;
-        }
-        .diam-tick-mark {
-            width: 1.5px;
-            height: 5px;
-            background-color: #94a3b8;
-            margin-bottom: 2px;
-            transition: background-color 0.15s ease, height 0.15s ease;
-        }
-        .diam-tick-label {
-            font-size: 11px;
-            line-height: 1.1;
-            font-weight: 500;
-            color: #64748b;
-            white-space: nowrap;
-            transition: color 0.15s ease, font-weight 0.15s ease;
-        }
-        .diam-tick-item:hover .diam-tick-label,
-        .diam-tick-item.is-active .diam-tick-label {
-            color: #2563eb;
-            font-weight: 700;
-        }
-        .diam-tick-item:hover .diam-tick-mark,
-        .diam-tick-item.is-active .diam-tick-mark {
-            background-color: #2563eb;
-            height: 7px;
-        }
-
-        .scheme-card {
-            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .scheme-card:hover {
-            transform: translateY(-2px);
-        }
-        .scheme-card.active {
-            border-color: #2563eb;
-            background-color: #eff6ff;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
-        }
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: #e2e8f0;
             border-radius: 4px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+        input[type=range]::-webkit-slider-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.1s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+        .gradient-blue-range {
+            background: linear-gradient(to right, #3b82f6 var(--range-progress, 20%), #e2e8f0 var(--range-progress, 20%));
+        }
+
+        /* Interactive Canvas */
+        #canvas2d, #modalCanvas {
+            touch-action: none;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Верхняя панель навигации -->
-    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-inner">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                    </svg>
+    <!-- TOP STICKY HEADER -->
+    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white font-bold text-xl leading-none">
+                    RC
                 </div>
                 <div>
-                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">RollCalc Pro <span class="text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full ml-1">Паллетирование и Намотка</span></h1>
-                    <p class="text-xs text-slate-400">Калькулятор площади, метража, оттисков, веса рулонов и схем укладки на паллеты (1200×800, 1100×1200, 1200×1200)</p>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-xl font-bold tracking-tight text-white">RollCalc Pro</h1>
+                        <span class="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs px-2 py-0.5 rounded-full font-medium">Паллетирование и Намотка</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Инженерный расчёт параметров намотки, оттисков и оптимизации укладки</p>
                 </div>
             </div>
-
-            <div class="flex items-center gap-2 sm:gap-3">
-                <button type="button" id="btnOpenCustomModal" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow transition cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    <span>Добавить свой вариант укладки</span>
+            
+            <div class="flex items-center gap-2.5">
+                <button id="btnOpenModal" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Добавить свой вариант укладки
                 </button>
-                <button type="button" id="btnResetDefaults" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer" title="Сбросить параметры к стандартным">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span class="hidden sm:inline">Сброс</span>
+                <button id="btnReset" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-sm font-medium border border-slate-700 transition flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Сброс
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Основная сетка приложения -->
-    <main class="max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- ЛЕВАЯ КОЛОНКА: Ввод параметров (4 колонки) -->
-        <div class="lg:col-span-4 space-y-5">
+        <!-- LEFT COLUMN: CONTROLS & INPUTS (lg:col-span-4) -->
+        <div class="lg:col-span-4 space-y-6">
 
-            <!-- БЛОК 1: Параметры рулона и материала -->
-            <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-6 bg-blue-600 rounded-full"></span>
-                        <h2 class="font-bold text-slate-800 text-base">1. Параметры рулона и материала</h2>
-                    </div>
-                    <span class="text-xs font-medium text-slate-400">Геометрия и сырье</span>
+            <!-- BLOCK 1: ROLL & MATERIAL PARAMS -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                        1. Параметры рулона и материала
+                    </h2>
                 </div>
 
-                <div class="space-y-4">
-                    <!-- Внешний диаметр рулона D с точной линейной шкалой -->
-                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/60">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label for="inputRollDiam" class="text-xs font-semibold uppercase tracking-wider text-slate-600">Внешний диаметр рулона (D)</label>
-                            <div class="flex items-center gap-1">
-                                <input type="number" id="inputRollDiam" min="80" max="1200" step="0.5" value="235"
-                                    class="mono w-24 text-right font-bold text-blue-700 bg-white border border-slate-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                <span class="text-xs font-semibold text-slate-500">мм</span>
-                            </div>
-                        </div>
+                <!-- Diameter D Slider & Input -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Внешний Ø рулона (D, мм)</label>
+                        <input type="number" id="inpDiameter" min="80" max="1200" value="235" class="w-24 px-2.5 py-1 text-right text-sm font-bold border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <input type="range" id="rngDiameter" min="100" max="800" value="235" step="1" class="w-full h-2 rounded-lg gradient-blue-range">
+                    <!-- Linear ticks -->
+                    <div class="flex justify-between text-[11px] text-slate-400 font-medium px-0.5">
+                        <button class="tick-btn hover:text-blue-600" data-val="100">100</button>
+                        <button class="tick-btn hover:text-blue-600" data-val="200">200</button>
+                        <button class="tick-btn hover:text-blue-600 font-semibold text-blue-600" data-val="240">240</button>
+                        <button class="tick-btn hover:text-blue-600" data-val="295">295</button>
+                        <button class="tick-btn hover:text-blue-600" data-val="400">400</button>
+                        <button class="tick-btn hover:text-blue-600" data-val="600">600</button>
+                        <button class="tick-btn hover:text-blue-600" data-val="800">800 мм</button>
+                    </div>
+                </div>
 
-                        <div class="py-1">
-                            <input type="range" id="sliderRollDiam" min="100" max="800" step="1" value="235" class="diam-slider">
-                            <div id="diamScaleTicks" class="diam-ticks-wrapper" aria-label="Шкала диаметров рулона в мм"></div>
+                <!-- Lock mode toggle & Roll length L -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-600">Режим пересчета:</span>
+                        <div class="inline-flex rounded-md shadow-sm text-xs" role="group">
+                            <button type="button" id="btnLockLength" class="px-2.5 py-1 font-medium bg-blue-600 text-white rounded-l-md border border-blue-600">
+                                Меняет Ø
+                            </button>
+                            <button type="button" id="btnLockDiameter" class="px-2.5 py-1 font-medium bg-white text-slate-700 hover:bg-slate-100 rounded-r-md border border-slate-300">
+                                Меняет метраж
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Длина намотки / Метраж рулона (L) + Целевой вес 1 рулона -->
-                    <div class="bg-blue-50/50 p-3.5 rounded-xl border border-blue-200/80 space-y-2.5">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <label for="inputRollLength" class="text-xs font-semibold uppercase tracking-wider text-blue-900 block">Метраж рулона (Длина намотки)</label>
-                                <span class="text-[10px] text-slate-500">Точный двусторонний пересчет с Ø и весом</span>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <input type="number" id="inputRollLength" min="1" max="100000" step="1" value="734"
-                                    class="mono w-24 text-right font-bold text-blue-700 bg-white border border-blue-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                <span class="text-xs font-semibold text-slate-600">пог. м</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between gap-1 flex-wrap">
-                            <span class="text-[11px] text-slate-500 font-medium">Быстрый метраж:</span>
-                            <div class="flex gap-1 flex-wrap">
-                                <button type="button" onclick="setQuickLength(500)" class="text-[11px] px-2 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-500 hover:text-blue-600 font-medium text-slate-600 cursor-pointer">500 м</button>
-                                <button type="button" onclick="setQuickLength(1000)" class="text-[11px] px-2 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-500 hover:text-blue-600 font-medium text-slate-600 cursor-pointer">1000 м</button>
-                                <button type="button" onclick="setQuickLength(1500)" class="text-[11px] px-2 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-500 hover:text-blue-600 font-medium text-slate-600 cursor-pointer">1500 м</button>
-                                <button type="button" onclick="setQuickLength(2000)" class="text-[11px] px-2 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-500 hover:text-blue-600 font-medium text-slate-600 cursor-pointer">2000 м</button>
-                                <button type="button" onclick="setQuickLength(3000)" class="text-[11px] px-2 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-500 hover:text-blue-600 font-medium text-slate-600 cursor-pointer">3000 м</button>
-                            </div>
-                        </div>
-
-                        <!-- Обратный подбор по целевому чистому весу 1 рулона (кг нетто) -->
-                        <div class="pt-2 border-t border-blue-200/60 flex items-center justify-between gap-2">
-                            <div>
-                                <label for="inputTargetNetWeight" class="text-[11px] font-semibold text-slate-700 block">Целевой чистый вес 1 рулона (Нетто):</label>
-                                <span class="text-[10px] text-slate-500">Вычисляет метраж и Ø под нужный вес</span>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <input type="number" id="inputTargetNetWeight" min="0.1" max="2000" step="0.1" value="16.88"
-                                    class="mono w-20 text-right font-bold text-emerald-700 bg-white border border-blue-300 rounded-lg px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                <span class="text-xs font-semibold text-slate-600">кг</span>
-                            </div>
-                        </div>
-
-                        <!-- Переключатель режима пересчета при смене толщины или шпули -->
-                        <div class="pt-2 border-t border-blue-200/60 flex items-center justify-between text-[11px] gap-1">
-                            <span class="text-slate-600 font-medium">При смене толщины / шпули:</span>
-                            <div class="inline-flex rounded-lg bg-white p-0.5 border border-blue-200 shrink-0">
-                                <button type="button" id="btnLockLength" onclick="setCalcLockMode('length')"
-                                    class="px-2 py-0.5 rounded-md font-semibold bg-blue-600 text-white transition cursor-pointer" title="Сохранять точный метраж, менять внешний диаметр D">
-                                    Менять Ø рулона
-                                </button>
-                                <button type="button" id="btnLockDiam" onclick="setCalcLockMode('diam')"
-                                    class="px-2 py-0.5 rounded-md font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer" title="Сохранять внешний диаметр D, менять метраж">
-                                    Менять метраж
-                                </button>
-                            </div>
-                        </div>
+                    
+                    <div class="flex items-center justify-between gap-2">
+                        <label class="text-xs font-semibold text-slate-700">Метраж рулона (L, пог. м):</label>
+                        <input type="number" id="inpLength" min="10" max="20000" value="1000" class="w-28 px-2.5 py-1 text-right text-sm font-bold border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    
+                    <!-- Quick length buttons -->
+                    <div class="flex flex-wrap gap-1.5 pt-1">
+                        <button class="btn-len bg-white hover:bg-blue-50 border border-slate-200 text-xs px-2 py-0.5 rounded text-slate-600" data-len="500">500 м</button>
+                        <button class="btn-len bg-white hover:bg-blue-50 border border-slate-200 text-xs px-2 py-0.5 rounded text-slate-600" data-len="1000">1000 м</button>
+                        <button class="btn-len bg-white hover:bg-blue-50 border border-slate-200 text-xs px-2 py-0.5 rounded text-slate-600" data-len="1500">1500 м</button>
+                        <button class="btn-len bg-white hover:bg-blue-50 border border-slate-200 text-xs px-2 py-0.5 rounded text-slate-600" data-len="2000">2000 м</button>
+                        <button class="btn-len bg-white hover:bg-blue-50 border border-slate-200 text-xs px-2 py-0.5 rounded text-slate-600" data-len="3000">3000 м</button>
                     </div>
 
-                    <!-- Выбор шпули (76 или 152 мм) + стенка и плотность картона -->
+                    <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-200/60">
+                        <span class="text-slate-500">Целевой чистый вес (кг нетто):</span>
+                        <input type="number" id="inpTargetNetWeight" placeholder="авто" step="0.1" class="w-20 px-2 py-0.5 text-right border border-slate-300 rounded text-xs">
+                    </div>
+                </div>
+
+                <!-- NEW PRINT REPEAT & STREAMS SECTION -->
+                <div class="bg-indigo-50/60 border border-indigo-100 rounded-lg p-3 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2z"/></svg>
+                            Шаг печати / раппорт (мм):
+                        </label>
+                        <input type="number" id="inpPrintStep" min="0" max="2000" step="0.1" value="250" class="w-24 px-2 py-1 text-right text-xs font-bold border border-indigo-200 rounded focus:ring-2 focus:ring-indigo-500 bg-white">
+                    </div>
+
+                    <div class="flex flex-wrap gap-1">
+                        <button class="btn-step bg-white hover:bg-indigo-100 border border-indigo-200 text-[11px] px-2 py-0.5 rounded text-indigo-700" data-step="0">Без (0)</button>
+                        <button class="btn-step bg-white hover:bg-indigo-100 border border-indigo-200 text-[11px] px-2 py-0.5 rounded text-indigo-700" data-step="150">150</button>
+                        <button class="btn-step bg-white hover:bg-indigo-100 border border-indigo-200 text-[11px] px-2 py-0.5 rounded text-indigo-700" data-step="200">200</button>
+                        <button class="btn-step bg-indigo-600 text-white font-semibold border border-indigo-600 text-[11px] px-2 py-0.5 rounded" data-step="250">250</button>
+                        <button class="btn-step bg-white hover:bg-indigo-100 border border-indigo-200 text-[11px] px-2 py-0.5 rounded text-indigo-700" data-step="300">300</button>
+                        <button class="btn-step bg-white hover:bg-indigo-100 border border-indigo-200 text-[11px] px-2 py-0.5 rounded text-indigo-700" data-step="400">400</button>
+                        <button class="btn-step bg-white hover:bg-indigo-100 border border-indigo-200 text-[11px] px-2 py-0.5 rounded text-indigo-700" data-step="500">500</button>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs pt-1">
+                        <span class="text-indigo-800 font-medium">Ручьев по ширине:</span>
+                        <div class="inline-flex rounded-md shadow-sm text-xs" id="groupStreams">
+                            <button class="btn-stream px-2.5 py-0.5 bg-indigo-600 text-white font-bold rounded-l border border-indigo-600" data-stream="1">1</button>
+                            <button class="btn-stream px-2.5 py-0.5 bg-white text-indigo-800 border border-indigo-200 hover:bg-indigo-100" data-stream="2">2</button>
+                            <button class="btn-stream px-2.5 py-0.5 bg-white text-indigo-800 border border-indigo-200 hover:bg-indigo-100" data-stream="3">3</button>
+                            <button class="btn-stream px-2.5 py-0.5 bg-white text-indigo-800 border border-indigo-200 hover:bg-indigo-100 rounded-r" data-stream="4">4</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Material type & Density -->
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">Выбор шпули (внутренний Ø)</label>
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <button type="button" id="btnCore76" onclick="selectCore(76)"
-                                class="flex items-center justify-between p-3 rounded-xl border-2 border-blue-600 bg-blue-50/70 text-left transition cursor-pointer">
-                                <div>
-                                    <div class="font-bold text-sm text-slate-900">76 мм (3")</div>
-                                    <div class="text-[11px] text-slate-500">Стандартная шпуля</div>
-                                </div>
-                                <div class="w-7 h-7 rounded-full border-4 border-blue-600 bg-white flex items-center justify-center text-[10px] font-bold mono text-blue-700">76</div>
-                            </button>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Материал</label>
+                        <select id="selMaterial" class="w-full px-2.5 py-1.5 text-xs font-medium border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="0.92" selected>ПВД (LDPE) - 0.92 г/см³</option>
+                            <option value="0.95">ПНД (HDPE) - 0.95 г/см³</option>
+                            <option value="0.91">BOPP - 0.91 г/см³</option>
+                            <option value="0.90">CPP - 0.90 г/см³</option>
+                            <option value="1.38">PET - 1.38 г/см³</option>
+                            <option value="1.14">PA (Полиамид) - 1.14 г/см³</option>
+                            <option value="0.80">Бумага - 0.80 г/см³</option>
+                            <option value="custom">Свой вариант...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Плотность (г/см³)</label>
+                        <input type="number" id="inpDensity" step="0.01" value="0.92" class="w-full px-2.5 py-1.5 text-xs font-bold border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
 
-                            <button type="button" id="btnCore152" onclick="selectCore(152)"
-                                class="flex items-center justify-between p-3 rounded-xl border-2 border-slate-200 bg-white hover:bg-slate-50 text-left transition cursor-pointer">
-                                <div>
-                                    <div class="font-bold text-sm text-slate-900">152 мм (6")</div>
-                                    <div class="text-[11px] text-slate-500">Промышленная шпуля</div>
-                                </div>
-                                <div class="w-8 h-8 rounded-full border-4 border-slate-400 bg-white flex items-center justify-center text-[10px] font-bold mono text-slate-600">152</div>
+                <!-- Material thickness & Width -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-semibold text-slate-600">Толщина (мкм)</label>
+                        </div>
+                        <input type="number" id="inpThickness" min="5" max="1000" value="50" class="w-full px-2.5 py-1.5 text-xs font-bold border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <div class="flex gap-1 mt-1">
+                            <button class="btn-thk bg-slate-100 text-[10px] px-1.5 py-0.5 rounded text-slate-600 hover:bg-slate-200" data-thk="20">20</button>
+                            <button class="btn-thk bg-slate-100 text-[10px] px-1.5 py-0.5 rounded text-slate-600 hover:bg-slate-200" data-thk="30">30</button>
+                            <button class="btn-thk bg-blue-100 text-[10px] font-bold px-1.5 py-0.5 rounded text-blue-700 hover:bg-blue-200" data-thk="50">50</button>
+                            <button class="btn-thk bg-slate-100 text-[10px] px-1.5 py-0.5 rounded text-slate-600 hover:bg-slate-200" data-thk="80">80</button>
+                            <button class="btn-thk bg-slate-100 text-[10px] px-1.5 py-0.5 rounded text-slate-600 hover:bg-slate-200" data-thk="100">100</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-semibold text-slate-600">Ширина (мм)</label>
+                        </div>
+                        <input type="number" id="inpWidth" min="50" max="3000" value="500" class="w-full px-2.5 py-1.5 text-xs font-bold border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <div class="flex gap-1 mt-1">
+                            <button class="btn-wid bg-slate-100 text-[10px] px-1.5 py-0.5 rounded text-slate-600 hover:bg-slate-200" data-wid="250">250</button>
+                            <button class="btn-wid bg-slate-100 text-[10px] px-1.5 py-0.5 rounded text-slate-600 hover:bg-slate-200" data-wid="400">400</button>
+                            <button class="btn-wid bg-blue-100 text-[10px] font-bold px-1.5 py-0.5 rounded text-blue-700 hover:bg-blue-200" data-wid="500">500</button>
+                            <button class="btn-wid bg-slate-100 text-[10px] px-1.5 py-0.5 rounded text-slate-600 hover:bg-slate-200" data-wid="1000">1000</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Winding Format (Layers) -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-600 block mb-1">Формат намотки (слои)</label>
+                    <select id="selFormat" class="w-full px-2.5 py-1.5 text-xs font-medium border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="1" selected>Полотно (1 слой)</option>
+                        <option value="2">Рукав / П-рукав (2 сложения)</option>
+                        <option value="4">С фальцами (4 сложения)</option>
+                    </select>
+                </div>
+
+                <!-- Core Parameters -->
+                <div class="border-t border-slate-100 pt-3 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-semibold text-slate-700">Гильза (шпуля):</label>
+                        <div class="inline-flex rounded-md shadow-sm text-xs" role="group">
+                            <button type="button" id="btnCore76" class="px-2.5 py-1 font-medium bg-blue-600 text-white rounded-l-md border border-blue-600">
+                                76 мм (3")
+                            </button>
+                            <button type="button" id="btnCore152" class="px-2.5 py-1 font-medium bg-white text-slate-700 hover:bg-slate-100 rounded-r-md border border-slate-300">
+                                152 мм (6")
                             </button>
                         </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <span class="text-slate-500 block">Толщина стенки (мм):</span>
+                            <input type="number" id="inpCoreWall" min="1" max="30" value="8" class="w-full px-2 py-1 border border-slate-300 rounded font-semibold mt-0.5">
+                        </div>
+                        <div>
+                            <span class="text-slate-500 block">Плотность гильзы:</span>
+                            <input type="number" id="inpCoreDensity" step="0.05" value="0.72" class="w-full px-2 py-1 border border-slate-300 rounded font-semibold mt-0.5">
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-slate-500 bg-slate-50 p-2 rounded">
+                        <span>Внешний Ø гильзы: <strong id="lblCoreOuter">92 мм</strong></span>
+                        <span>Вес 1 гильзы: <strong id="lblCoreWeight">0.45 кг</strong></span>
+                    </div>
+                </div>
+            </div>
 
-                        <div class="mt-2.5 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200/70 text-xs space-y-1.5">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <label for="inputCoreWall" class="text-slate-600 font-medium">Стенка шпули:</label>
-                                    <input type="number" id="inputCoreWall" min="0" max="35" step="0.5" value="8"
-                                        class="mono w-14 text-center font-semibold bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs focus:outline-none focus:border-blue-500">
-                                    <span class="text-slate-500">мм</span>
-                                </div>
-                                <div class="text-slate-500">
-                                    Наруж. Ø: <strong id="lblCoreOuterDiam" class="mono text-slate-800">92 мм</strong>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between pt-1 border-t border-slate-200/60">
-                                <div class="flex items-center gap-1.5">
-                                    <label for="inputCoreDensity" class="text-slate-600 font-medium">Плотность картона:</label>
-                                    <input type="number" id="inputCoreDensity" min="0.2" max="2.0" step="0.02" value="0.72"
-                                        class="mono w-14 text-center font-semibold bg-white border border-slate-300 rounded px-1.5 py-0.5 text-xs focus:outline-none focus:border-blue-500">
-                                    <span class="text-slate-500">г/см³</span>
-                                </div>
-                                <div class="text-slate-500">
-                                    Вес гильзы: <strong id="lblSingleCoreWeight" class="mono text-slate-800">0.76 кг</strong>
-                                </div>
-                            </div>
+            <!-- BLOCK 2: PALLET & PACKING METHOD -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        2. Паллета и способ укладки
+                    </h2>
+                </div>
+
+                <!-- Pallet Select -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-600 block mb-1">Размер паллеты</label>
+                    <select id="selPalletSize" class="w-full px-2.5 py-1.5 text-xs font-medium border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white">
+                        <option value="1200x800x22" selected>EUR (1200 × 800 мм, 22 кг)</option>
+                        <option value="1100x1200x25">FIN / IND (1100 × 1200 мм, 25 кг)</option>
+                        <option value="1200x1200x27">Квадрат (1200 × 1200 мм, 27 кг)</option>
+                    </select>
+                </div>
+
+                <!-- Orientation: Vertical vs Horizontal -->
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-600 block">Ориентация рулонов</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btnOrientVert" class="py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 border-emerald-600 bg-emerald-50 text-emerald-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            На торец (Вертик.)
+                        </button>
+                        <button id="btnOrientHoriz" class="py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 border-slate-300 bg-white text-slate-600 hover:bg-slate-50">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                            Горизонтально
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Horizontal sub-options (hidden by default) -->
+                <div id="horizSubOptions" class="hidden bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-3">
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <span class="text-slate-600 font-medium block mb-1">Ось укладки:</span>
+                            <select id="selHorizAxis" class="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white">
+                                <option value="length">Вдоль длины (1200)</option>
+                                <option value="width">Вдоль ширины (800)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <span class="text-slate-600 font-medium block mb-1">Стиль укладки:</span>
+                            <select id="selHorizStyle" class="w-full px-2 py-1 text-xs border border-slate-300 rounded bg-white">
+                                <option value="straight">Прямой штабель</option>
+                                <option value="pyramid">Пирамида</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roll Gap -->
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-semibold text-slate-600">Зазор между рулонами (мм)</label>
+                        <input type="number" id="inpRollGap" min="0" max="50" value="0" class="w-16 px-2 py-0.5 text-right text-xs border border-slate-300 rounded font-bold">
+                    </div>
+                    <div class="flex gap-1">
+                        <button class="btn-gap bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2 py-0.5 rounded" data-gap="0">0 мм</button>
+                        <button class="btn-gap bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded hover:bg-slate-200" data-gap="5">5 мм</button>
+                        <button class="btn-gap bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded hover:bg-slate-200" data-gap="10">10 мм</button>
+                        <button class="btn-gap bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded hover:bg-slate-200" data-gap="15">15 мм</button>
+                        <button class="btn-gap bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded hover:bg-slate-200" data-gap="20">20 мм</button>
+                    </div>
+                </div>
+
+                <!-- Tiers & Pallet Weight -->
+                <div class="grid grid-cols-2 gap-3 items-center">
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Число ярусов (рядов)</label>
+                        <div class="flex items-center space-x-1">
+                            <button id="btnTierMinus" class="bg-slate-200 hover:bg-slate-300 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-slate-700">-</button>
+                            <input type="number" id="inpTiers" min="1" max="15" value="3" class="w-14 h-8 text-center border border-slate-300 rounded-lg font-bold text-sm">
+                            <button id="btnTierPlus" class="bg-slate-200 hover:bg-slate-300 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-slate-700">+</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-slate-600 block mb-1">Вес поддона (кг)</label>
+                        <input type="number" id="inpPalletTare" value="22" class="w-full px-2.5 py-1.5 text-xs font-bold border border-slate-300 rounded-lg">
+                    </div>
+                </div>
+
+                <!-- Pallet Limits & Max Tier Calc Button -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between text-xs font-medium text-slate-700">
+                        <span>Ограничения паллеты:</span>
+                        <button id="btnMaxTiers" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-[11px] font-semibold transition">
+                            Макс. ярусов под лимит
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <span class="text-slate-500">Макс. высота (мм):</span>
+                            <input type="number" id="inpMaxHeight" value="1800" class="w-full px-2 py-1 border border-slate-300 rounded text-xs font-semibold mt-0.5">
+                        </div>
+                        <div>
+                            <span class="text-slate-500">Макс. брутто (кг):</span>
+                            <input type="number" id="inpMaxGross" value="1000" class="w-full px-2 py-1 border border-slate-300 rounded text-xs font-semibold mt-0.5">
+                        </div>
+                    </div>
+                    <div id="badgeLimitStatus" class="text-[11px] px-2 py-1 rounded font-semibold text-center bg-emerald-100 text-emerald-800">
+                        Ограничения не превышены
+                    </div>
+                </div>
+
+                <!-- Interlayer sheets & Wrap -->
+                <div class="space-y-2 border-t border-slate-100 pt-3">
+                    <label class="flex items-center justify-between text-xs font-semibold text-slate-700 cursor-pointer">
+                        <span class="flex items-center gap-1.5">
+                            <input type="checkbox" id="chkInterlayer" checked class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+                            Межъярусные листы картона
+                        </span>
+                        <span class="text-slate-400 font-normal">4 мм, 0.8 кг/шт</span>
+                    </label>
+
+                    <label class="flex items-center justify-between text-xs font-semibold text-slate-700 cursor-pointer">
+                        <span class="flex items-center gap-1.5">
+                            <input type="checkbox" id="chkStretchWrap" checked class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+                            Стретч-пленка и упак. материалы
+                        </span>
+                        <span class="text-slate-400 font-normal">1.5 кг/палл.</span>
+                    </label>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: KPI, VISUALIZATION, BATCH PLANNING & SCHEMES (lg:col-span-8) -->
+        <div class="lg:col-span-8 space-y-6">
+
+            <!-- 4 MAIN KPI CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- KPI 1: Area per roll -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Площадь 1 рулона</div>
+                    <div class="text-2xl font-bold text-slate-800 mt-1" id="kpiRollArea">500.0 м²</div>
+                    <div class="text-xs text-slate-500 mt-1 flex justify-between">
+                        <span>Ширина: <strong id="kpiRollWidthSub">500 мм</strong></span>
+                        <span>Толщина: <strong id="kpiRollThkSub">50 мкм</strong></span>
+                    </div>
+                </div>
+
+                <!-- KPI 2: Meterage per roll + Impressions -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Метраж 1 рулона</div>
+                    <div class="text-2xl font-bold text-slate-800 mt-1" id="kpiRollLength">1 000 пог. м</div>
+                    <div class="text-xs text-indigo-600 font-semibold mt-1 truncate" id="kpiRollImpressions">
+                        Оттисков (250мм): 4 000 шт
+                    </div>
+                </div>
+
+                <!-- KPI 3: Roll Weight -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Вес 1 рулона</div>
+                    <div class="text-2xl font-bold text-slate-800 mt-1" id="kpiRollNet">23.00 кг</div>
+                    <div class="text-xs text-slate-500 mt-1 flex justify-between">
+                        <span>Брутто: <strong id="kpiRollGross">23.45 кг</strong></span>
+                        <span>Гильза: <strong id="kpiRollCoreSub">0.45 кг</strong></span>
+                    </div>
+                </div>
+
+                <!-- KPI 4: Total Pallet Summary (Dark Card) -->
+                <div class="bg-slate-900 text-white p-4 rounded-xl shadow-sm border border-slate-800">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Всего на паллете</div>
+                    <div class="text-2xl font-bold text-emerald-400 mt-1" id="kpiPalletRolls">72 рулонов</div>
+                    <div class="text-xs text-slate-300 mt-1 flex justify-between border-t border-slate-800 pt-1">
+                        <span>Вес брутто: <strong id="kpiPalletGross" class="text-white">1 712 кг</strong></span>
+                        <span>Площадь: <strong id="kpiPalletArea" class="text-white">36 000 м²</strong></span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VISUALIZATION & INTERACTIVE PACKING SCHEME SECTION -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-3">
+                        <h2 class="font-bold text-slate-800 text-base">Схема укладки и визуализация</h2>
+                        <label class="flex items-center gap-1.5 text-xs text-slate-600 font-medium cursor-pointer">
+                            <input type="checkbox" id="chkAutoSelectScheme" checked class="rounded border-slate-300 text-blue-600">
+                            Автоподбор оптимальной схемы
+                        </label>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button id="btnEditCustomScheme" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-lg font-semibold transition border border-slate-200 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Изменить / Сдвинуть рулоны
+                        </button>
+                    </div>
+                </div>
+
+                <!-- WARNING OVERHANG / OVERLAP BANNER -->
+                <div id="bannerWarning" class="hidden p-3 rounded-lg border text-xs flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span id="txtWarningMessage">Внимание: обнаружены выступы за края паллеты!</span>
+                    </div>
+                    <button id="btnFixScheme" class="underline font-bold hover:opacity-80 flex-shrink-0">Подобрать оптимальную</button>
+                </div>
+
+                <!-- CANVAS 2D TOP VIEW & THREE.JS 3D VIEW (TOGGLE TABS OR SIDE BY SIDE) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- 2D View Container -->
+                    <div class="bg-slate-900 rounded-xl p-3 flex flex-col items-center justify-between relative min-h-[320px]">
+                        <div class="w-full flex justify-between items-center text-xs text-slate-300 mb-2 border-b border-slate-800 pb-1.5">
+                            <span class="font-semibold flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-blue-400"></span> 2D Вид сверху (Слой)
+                            </span>
+                            <span class="text-slate-400 text-[11px]" id="lbl2dStats">Рулонов в слое: 24 шт</span>
+                        </div>
+                        
+                        <div class="relative w-full flex-1 flex items-center justify-center">
+                            <canvas id="canvas2d" width="340" height="260" class="max-w-full rounded bg-slate-950 border border-slate-800"></canvas>
+                        </div>
+
+                        <div class="w-full flex justify-between items-center text-[11px] text-slate-400 mt-2 pt-1 border-t border-slate-800">
+                            <span>Плотность укладки: <strong class="text-white" id="lblPackingDensity">78.5%</strong></span>
+                            <span>Выступ: <strong class="text-emerald-400" id="lblOverhangMm">0 мм</strong></span>
                         </div>
                     </div>
 
-                    <!-- Толщина материала (мкм) и Ширина рулона (мм) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-                            <label for="inputThickness" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Толщина 1 слоя</label>
-                            <div class="flex items-center gap-1.5">
-                                <input type="number" id="inputThickness" min="1" max="2000" step="0.5" value="50"
-                                    class="mono w-full font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                <span class="text-xs font-semibold text-slate-500">мкм</span>
-                            </div>
-                            <div class="flex gap-1 mt-2 flex-wrap">
-                                <button type="button" onclick="setThickness(20)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-400 text-slate-600 cursor-pointer">20</button>
-                                <button type="button" onclick="setThickness(30)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-400 text-slate-600 cursor-pointer">30</button>
-                                <button type="button" onclick="setThickness(50)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-400 text-slate-600 cursor-pointer">50</button>
-                                <button type="button" onclick="setThickness(80)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-400 text-slate-600 cursor-pointer">80</button>
-                                <button type="button" onclick="setThickness(100)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-400 text-slate-600 cursor-pointer">100</button>
+                    <!-- 3D View Container -->
+                    <div class="bg-slate-900 rounded-xl p-3 flex flex-col justify-between relative min-h-[320px]">
+                        <div class="w-full flex justify-between items-center text-xs text-slate-300 mb-2 border-b border-slate-800 pb-1.5">
+                            <span class="font-semibold flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> 3D Интерактивная модель
+                            </span>
+                            <div class="flex items-center gap-1 text-[10px]">
+                                <button class="btn-cam bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded" data-cam="3d">3D</button>
+                                <button class="btn-cam bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded" data-cam="front">Спереди</button>
+                                <button class="btn-cam bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded" data-cam="side">Сбоку</button>
+                                <button class="btn-cam bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded" data-cam="top">Сверху</button>
                             </div>
                         </div>
 
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-                            <label for="inputWidth" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Ширина рулона (B)</label>
-                            <div class="flex items-center gap-1.5">
-                                <input type="number" id="inputWidth" min="20" max="3000" step="5" value="500"
-                                    class="mono w-full font-bold text-slate-900 bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                                <span class="text-xs font-semibold text-slate-500">мм</span>
-                            </div>
-                            <div class="flex gap-1 mt-2 flex-wrap">
-                                <button type="button" onclick="setWidth(250)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-400 text-slate-600 cursor-pointer">250</button>
-                                <button type="button" onclick="setWidth(400)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-400 text-slate-600 cursor-pointer">400</button>
-                                <button type="button" onclick="setWidth(500)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-400 text-slate-600 cursor-pointer">500</button>
-                                <button type="button" onclick="setWidth(1000)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-blue-400 text-slate-600 cursor-pointer">1000</button>
-                            </div>
+                        <div id="container3d" class="w-full flex-1 min-h-[220px] rounded bg-slate-950 relative overflow-hidden">
+                            <!-- Three.js Canvas inserted here -->
+                        </div>
+
+                        <div class="w-full flex justify-between items-center text-[11px] text-slate-400 mt-2 pt-1 border-t border-slate-800">
+                            <span>Зажмите ЛКМ для вращения, колесико для зума</span>
                         </div>
                     </div>
 
-                    <!-- Шаг печати (раппорт) в мм и количество ручьев по ширине -->
-                    <div class="bg-sky-50/60 p-3 rounded-xl border border-sky-200/80 space-y-2">
-                        <div class="flex items-center justify-between gap-2">
+                </div>
+
+                <!-- PALLET METRICS DETAILED BOX -->
+                <div class="bg-slate-50 rounded-lg p-3 border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div>
+                        <span class="text-slate-500 block">Собранная паллета (В×Ш×Г):</span>
+                        <strong class="text-slate-800 font-bold" id="lblPalletDimensions">1200 × 800 × 855 мм</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Общий метраж паллеты:</span>
+                        <strong class="text-slate-800 font-bold" id="lblPalletTotalMeters">72 000 пог. м</strong>
+                    </div>
+                    <div>
+                        <span class="text-indigo-600 font-medium block">Оттисков на паллете:</span>
+                        <strong class="text-indigo-900 font-bold" id="lblPalletImpressions">288 000 шт</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">Чистый вес / Тара:</span>
+                        <strong class="text-slate-800 font-bold" id="lblPalletNetVsTare">1 656 кг / 56 кг</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BATCH / ORDER PLANNING SECTION -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Планирование партии / Расчет под объем заказа
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Ведите объем партии в кг, штуках, метраже, м² или оттисках для мгновенного расчета паллет</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                    <div class="sm:col-span-2 space-y-1">
+                        <label class="text-xs font-semibold text-slate-700 block">Объем заказа / партии:</label>
+                        <div class="flex">
+                            <input type="number" id="inpBatchVolume" value="5000" min="1" class="w-full px-3 py-2 text-sm font-bold border border-slate-300 rounded-l-lg focus:ring-2 focus:ring-blue-500">
+                            <select id="selBatchUnit" class="bg-slate-100 border border-l-0 border-slate-300 rounded-r-lg px-3 py-2 text-xs font-bold text-slate-700">
+                                <option value="kg" selected>кг (чистый вес)</option>
+                                <option value="rolls">штук (рулонов)</option>
+                                <option value="meters">пог. метров</option>
+                                <option value="sqm">м² (площадь)</option>
+                                <option value="impressions">оттисков (шт)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <!-- Quick volume buttons -->
+                        <div class="flex flex-wrap gap-1">
+                            <button class="btn-vol bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-2 py-1 rounded font-medium" data-vol="1000" data-unit="kg">1 000 кг</button>
+                            <button class="btn-vol bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-2 py-1 rounded font-medium" data-vol="5000" data-unit="kg">5 000 кг</button>
+                            <button class="btn-vol bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] px-2 py-1 rounded font-medium" data-vol="20000" data-unit="kg">20 т</button>
+                            <button class="btn-vol bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] px-2 py-1 rounded font-medium" data-vol="100000" data-unit="impressions">100 тыс отт.</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BATCH RESULTS GRID -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+                    <div class="bg-blue-50/70 border border-blue-100 p-3 rounded-lg">
+                        <div class="text-[11px] font-semibold text-blue-700 uppercase">Всего рулонов</div>
+                        <div class="text-xl font-bold text-blue-900 mt-0.5" id="lblBatchTotalRolls">218 шт</div>
+                        <div class="text-[11px] text-blue-700 mt-0.5" id="lblBatchTotalMeters">218 000 пог. м</div>
+                    </div>
+
+                    <div class="bg-emerald-50/70 border border-emerald-100 p-3 rounded-lg">
+                        <div class="text-[11px] font-semibold text-emerald-700 uppercase">Потребуется паллет</div>
+                        <div class="text-xl font-bold text-emerald-900 mt-0.5" id="lblBatchPalletsCount">4 паллеты</div>
+                        <div class="text-[11px] text-emerald-700 mt-0.5" id="lblBatchPalletBreakdown">3 полных + 1 сдача</div>
+                    </div>
+
+                    <div class="bg-amber-50/70 border border-amber-100 p-3 rounded-lg">
+                        <div class="text-[11px] font-semibold text-amber-800 uppercase">Последняя паллета</div>
+                        <div class="text-xl font-bold text-amber-950 mt-0.5" id="lblBatchLastPalletRolls">2 juste 2-яруса</div>
+                        <div class="text-[11px] text-amber-800 mt-0.5" id="lblBatchLastPalletWeight">Вес: ~512 кг</div>
+                    </div>
+
+                    <div class="bg-slate-100 border border-slate-200 p-3 rounded-lg">
+                        <div class="text-[11px] font-semibold text-slate-600 uppercase">Общий вес брутто партии</div>
+                        <div class="text-xl font-bold text-slate-900 mt-0.5" id="lblBatchTotalGross">5 240 кг</div>
+                        <div class="text-[11px] text-slate-500 mt-0.5" id="lblBatchTotalImpressions">Всего: 872 000 отт.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOCK 3: PALLET SCHEME OPTIONS CARDS -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-base">3. Варианты схем укладки на паллету</h2>
+                        <p class="text-xs text-slate-500">Выберите схему для загрузки или создайте свою</p>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg text-xs" id="schemeFilterTabs">
+                        <button class="px-2.5 py-1 rounded-md font-semibold bg-white shadow-sm text-slate-800" data-filter="all">Все схемы</button>
+                        <button class="px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900" data-filter="standard">Типовые 9</button>
+                        <button class="px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900" data-filter="wide">Широкие и мои</button>
+                    </div>
+                </div>
+
+                <!-- CARDS GRID CONTAINING ALL SCHEMES -->
+                <div id="gridSchemes" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <!-- Scheme Cards populated via JS -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            RollCalc Pro &copy; 2026 | Инженерный расчёт намотки, оттисков печати и оптимизация транспортной паллетирования
+        </div>
+    </footer>
+
+    <!-- CUSTOM SCHEME CONSTRUCTOR MODAL -->
+    <div id="modalScheme" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+            
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-lg">Конструктор пользовательской схемы укладки</h3>
+                    <p class="text-xs text-slate-400">Перетаскивайте рулоны мышью. Рулоны прилипают к краям и другим рулонам.</p>
+                </div>
+                <button id="btnCloseModal" class="text-slate-400 hover:text-white text-2xl font-bold leading-none">&times;</button>
+            </div>
+
+            <div class="p-6 flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-12 gap-6">
+                
+                <!-- Left: Canvas Area (md:col-span-7) -->
+                <div class="md:col-span-7 flex flex-col items-center justify-center bg-slate-950 p-4 rounded-xl relative">
+                    <div class="text-xs text-slate-400 mb-2 font-medium flex justify-between w-full">
+                        <span>Рабочее поле (Внешний contour паллеты)</span>
+                        <span id="modalCanvasSize">1200 × 800 мм</span>
+                    </div>
+
+                    <canvas id="modalCanvas" width="440" height="320" class="border border-slate-800 rounded bg-slate-900 cursor-crosshair shadow-inner"></canvas>
+
+                    <div class="w-full flex justify-between items-center text-[11px] text-slate-400 mt-3">
+                        <button id="btnClearModalRolls" class="text-red-400 hover:underline">Очистить все рулоны</button>
+                        <span>Рулонов на схеме: <strong class="text-white" id="modalRollCount">0 шт</strong></span>
+                    </div>
+                </div>
+
+                <!-- Right: Controls & Presets (md:col-span-5) -->
+                <div class="md:col-span-5 space-y-4 text-xs">
+                    
+                    <div class="space-y-1.5">
+                        <label class="font-semibold text-slate-700 block">Название Вашей схемы:</label>
+                        <input type="text" id="inpSchemeName" value="Моя схема 1" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-medium text-sm">
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+                        <div class="font-bold text-slate-800">Быстрая генерация по сетке:</div>
+                        <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label for="inputPrintStepMm" class="text-xs font-semibold uppercase tracking-wider text-sky-950 block">Шаг печати (раппорт)</label>
-                                <span class="text-[10px] text-slate-500">0 — без печати; задает число оттисков из метража</span>
+                                <span class="text-slate-500">По длине (Nx):</span>
+                                <input type="number" id="inpGridNx" min="1" max="15" value="4" class="w-full px-2 py-1 border border-slate-300 rounded">
                             </div>
-                            <div class="flex items-center gap-1">
-                                <input type="number" id="inputPrintStepMm" min="0" max="5000" step="0.5" value="250"
-                                    class="mono w-20 text-right font-bold text-sky-800 bg-white border border-sky-300 rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                                <span class="text-xs font-semibold text-slate-600">мм</span>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between gap-1 flex-wrap">
-                            <div class="flex gap-1 flex-wrap">
-                                <button type="button" onclick="setPrintStep(0)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-sky-400 text-slate-600 cursor-pointer">Без</button>
-                                <button type="button" onclick="setPrintStep(150)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-sky-400 text-slate-600 cursor-pointer">150</button>
-                                <button type="button" onclick="setPrintStep(200)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-sky-400 text-slate-600 cursor-pointer">200</button>
-                                <button type="button" onclick="setPrintStep(250)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-sky-400 text-slate-600 cursor-pointer">250</button>
-                                <button type="button" onclick="setPrintStep(300)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-sky-400 text-slate-600 cursor-pointer">300</button>
-                                <button type="button" onclick="setPrintStep(400)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-sky-400 text-slate-600 cursor-pointer">400</button>
-                                <button type="button" onclick="setPrintStep(500)" class="text-[11px] px-1.5 py-0.5 bg-white border border-slate-200 rounded hover:border-sky-400 text-slate-600 cursor-pointer">500</button>
+                            <div>
+                                <span class="text-slate-500">По ширине (Ny):</span>
+                                <input type="number" id="inpGridNy" min="1" max="15" value="3" class="w-full px-2 py-1 border border-slate-300 rounded">
                             </div>
                         </div>
-
-                        <div class="pt-1.5 border-t border-sky-200/60 flex items-center justify-between gap-2 text-xs">
-                            <span class="text-slate-600 font-medium">Ручьев по ширине рулона:</span>
-                            <div class="inline-flex rounded-lg bg-white p-0.5 border border-sky-200">
-                                <button type="button" id="btnStreams_1" onclick="selectPrintStreams(1)" class="px-2.5 py-0.5 rounded-md font-semibold bg-sky-600 text-white text-[11px] transition cursor-pointer">1</button>
-                                <button type="button" id="btnStreams_2" onclick="selectPrintStreams(2)" class="px-2.5 py-0.5 rounded-md font-medium text-slate-600 hover:text-slate-900 text-[11px] transition cursor-pointer">2</button>
-                                <button type="button" id="btnStreams_3" onclick="selectPrintStreams(3)" class="px-2.5 py-0.5 rounded-md font-medium text-slate-600 hover:text-slate-900 text-[11px] transition cursor-pointer">3</button>
-                                <button type="button" id="btnStreams_4" onclick="selectPrintStreams(4)" class="px-2.5 py-0.5 rounded-md font-medium text-slate-600 hover:text-slate-900 text-[11px] transition cursor-pointer">4</button>
-                            </div>
-                        </div>
+                        <button id="btnGenerateGrid" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-1.5 rounded transition">
+                            Заполнить сеткой
+                        </button>
                     </div>
 
-                    <!-- Формат намотки: Полотно (1 сл.) / Рукав-Полурукав (2 сл.) / С фальцами (4 сл.) -->
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <label class="text-xs font-semibold uppercase tracking-wider text-slate-600">Формат намотки (Слоев в витке)</label>
-                            <span id="lblEffectiveThickness" class="mono text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">В витке: 50 мкм</span>
-                        </div>
-                        <div class="grid grid-cols-3 gap-1.5">
-                            <button type="button" id="btnLayers_1" onclick="selectWindingLayers(1)"
-                                class="p-2 rounded-lg border-2 border-blue-600 bg-blue-50/70 text-center transition cursor-pointer">
-                                <div class="font-bold text-xs text-slate-900">Полотно</div>
-                                <div class="text-[10px] text-slate-500">1 слой</div>
-                            </button>
-                            <button type="button" id="btnLayers_2" onclick="selectWindingLayers(2)"
-                                class="p-2 rounded-lg border-2 border-slate-200 bg-white hover:bg-slate-50 text-center transition cursor-pointer">
-                                <div class="font-bold text-xs text-slate-900">Рукав / П-рукав</div>
-                                <div class="text-[10px] text-slate-500">2 слоя (×2 толщ.)</div>
-                            </button>
-                            <button type="button" id="btnLayers_4" onclick="selectWindingLayers(4)"
-                                class="p-2 rounded-lg border-2 border-slate-200 bg-white hover:bg-slate-50 text-center transition cursor-pointer">
-                                <div class="font-bold text-xs text-slate-900">С фальцами</div>
-                                <div class="text-[10px] text-slate-500">4 слоя (×4 толщ.)</div>
-                            </button>
-                        </div>
+                    <div class="space-y-2 pt-2 border-t border-slate-100">
+                        <button id="btnAddSingleRoll" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold py-2 rounded-lg transition flex items-center justify-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                            Добавить 1 рулон по центру
+                        </button>
                     </div>
 
-                    <!-- Плотность материала -->
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 text-amber-900 text-[11px] space-y-1">
+                        <div class="font-bold flex items-center gap-1">
+                            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Советы по созданию:
+                        </div>
+                        <p>Кликните по рулону на холсте, чтобы выделить его. Нажмите Delete или Backspace, чтобы удалить его.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="bg-slate-100 px-6 py-3 border-t border-slate-200 flex justify-end gap-3">
+                <button id="btnCancelModal" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-200 text-xs font-semibold">Отмена</button>
+                <button id="btnSaveCustomScheme" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow transition">
+                    Сохранить и применить схему
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MAIN APP JAVASCRIPT CODE -->
+    <script>
+        // Global State & Data Models
+        const state = {
+            diameter: 235,        // mm
+            length: 1000,         // m
+            lockMode: 'diameter', // 'diameter' means changing length recalculates diameter, 'length' means changing diameter recalculates length
+            printStepMm: 250,     // mm (repeat step / rapport)
+            printStreams: 1,      // streams across width
+            materialDensity: 0.92,// g/cm³
+            thicknessMicrons: 50, // µm
+            widthMm: 500,         // mm
+            windingFormat: 1,     // 1: Полотно, 2: Рукав, 4: С фальцами
+            
+            coreInner: 76,        // mm (76 or 152)
+            coreWall: 8,          // mm
+            coreDensity: 0.72,    // g/cm³
+
+            palletLength: 1200,   // mm
+            palletWidth: 800,     // mm
+            palletTare: 22,       // kg
+            orientation: 'vert',  // 'vert' | 'horiz'
+            horizAxis: 'length',  // 'length' | 'width'
+            horizStyle: 'straight',// 'straight' | 'pyramid'
+            rollGap: 0,           // mm
+            tiers: 3,
+            maxHeight: 1800,      // mm
+            maxGross: 1000,       // kg
+            useInterlayer: true,  // 4mm cardboard
+            useStretchWrap: true, // 1.5kg wrap
+
+            autoSelectScheme: true,
+            activeSchemeId: 'eur_24',
+            customSchemes: [],    // user defined schemes in localStorage
+
+            batchVolume: 5000,
+            batchUnit: 'kg'
+        };
+
+        // Standard EUR Pallet Schemes Database (1200x800)
+        const PRESET_SCHEMES = [
+            { id: 'eur_24', name: '24 рулона (6x4)', count: 24, type: 'grid', nx: 6, ny: 4, isStandard: true },
+            { id: 'eur_18', name: '18 рулонов (6x3)', count: 18, type: 'grid', nx: 6, ny: 3, isStandard: true },
+            { id: 'eur_12', name: '12 рулонов (4x3)', count: 12, type: 'grid', nx: 4, ny: 3, isStandard: true },
+            { id: 'eur_11', name: '11 рулонов (Шахматка)', count: 11, type: 'staggered_11', isStandard: true },
+            { id: 'eur_8',  name: '8 рулонов (4x2)',  count: 8,  type: 'grid', nx: 4, ny: 2, isStandard: true },
+            { id: 'eur_7',  name: '7 рулонов (Смешанный)', count: 7, type: 'staggered_7', isStandard: true },
+            { id: 'eur_6',  name: '6 рулонов (3x2)',  count: 6,  type: 'grid', nx: 3, ny: 2, isStandard: true },
+            { id: 'eur_4',  name: '4 рулона (2x2)',  count: 4,  type: 'grid', nx: 2, ny: 2, isStandard: true },
+            { id: 'eur_3',  name: '3 рулона (3x1)',  count: 3,  type: 'grid', nx: 3, ny: 1, isStandard: true },
+            { id: 'eur_2',  name: '2 рулона (2x1)',  count: 2,  type: 'grid', nx: 2, ny: 1, isStandard: true },
+            { id: 'eur_1',  name: '1 рулон (Центр)', count: 1,  type: 'grid', nx: 1, ny: 1, isStandard: true }
+        ];
+
+        // Three.js Global Variables
+        let scene, camera, renderer, palletGroup, rollGroup, interlayerGroup;
+        let isMouseDown = false, mouseX = 0, mouseY = 0;
+        let targetRotationX = 0.4, targetRotationY = -0.6;
+        let targetZoom = 1800;
+
+        // Custom Modal Constructor State
+        let modalRolls = [];
+        let selectedModalRollIndex = -1;
+        let isDraggingModalRoll = false;
+
+        // --- DOM Elements Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCustomSchemesFromStorage();
+            initThreeJS();
+            bindEvents();
+            recalculateAll();
+            renderSchemesGrid();
+        });
+
+        // Load custom schemes from localStorage
+        function loadCustomSchemesFromStorage() {
+            try {
+                const stored = localStorage.getItem('rollcalc_custom_schemes');
+                if (stored) {
+                    state.customSchemes = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.error("Failed to load local storage schemes", e);
+            }
+        }
+
+        function saveCustomSchemesToStorage() {
+            try {
+                localStorage.setItem('rollcalc_custom_schemes', JSON.stringify(state.customSchemes));
+            } catch (e) {
+                console.error("Failed to save local storage schemes", e);
+            }
+        }
+
+        // --- Core Calculations ---
+        function recalculateAll() {
+            // Core outer diameter and core weight
+            const coreOuterMm = state.coreInner + (2 * state.coreWall);
+            // Single core volume in cm³ = π/4 * (d_out² - d_in²) * width_cm
+            const dOutCm = coreOuterMm / 10;
+            const dInCm = state.coreInner / 10;
+            const widthCm = state.widthMm / 10;
+            const coreVolCm3 = (Math.PI / 4) * (Math.pow(dOutCm, 2) - Math.pow(dInCm, 2)) * widthCm;
+            const coreWeightKg = (coreVolCm3 * state.coreDensity) / 1000;
+
+            // Material Effective Thickness in mm considering winding format
+            const effectiveThkMm = (state.thicknessMicrons / 1000) * state.windingFormat;
+
+            // Recalculate Diameter or Length based on Lock Mode
+            if (state.lockMode === 'diameter') {
+                // Length is given, calculate D:
+                // L_mm = π * (D² - d_out²) / (4 * thk_mm)
+                const dOutSq = Math.pow(coreOuterMm, 2);
+                const lMm = state.length * 1000;
+                const dSq = dOutSq + (4 * lMm * effectiveThkMm / Math.PI);
+                state.diameter = Math.round(Math.sqrt(dSq));
+                document.getElementById('inpDiameter').value = state.diameter;
+                document.getElementById('rngDiameter').value = Math.min(800, Math.max(100, state.diameter));
+            } else {
+                // Diameter is given, calculate L:
+                const dOut = coreOuterMm;
+                if (state.diameter > dOut) {
+                    const lMm = (Math.PI * (Math.pow(state.diameter, 2) - Math.pow(dOut, 2))) / (4 * effectiveThkMm);
+                    state.length = Math.round(lMm / 1000);
+                } else {
+                    state.length = 0;
+                }
+                document.getElementById('inpLength').value = state.length;
+            }
+
+            // Update Linear Slider visual progress gradient
+            const rng = document.getElementById('rngDiameter');
+            const pct = ((rng.value - rng.min) / (rng.max - rng.min)) * 100;
+            rng.style.setProperty('--range-progress', `${pct}%`);
+
+            // 1 Roll Area (m²)
+            const rollAreaSqm = (state.length * (state.widthMm / 1000)) * state.windingFormat;
+
+            // 1 Roll Net Weight (kg)
+            // Volume m³ = L * Width_m * Thk_m * Format
+            const rollVolM3 = state.length * (state.widthMm / 1000) * ((state.thicknessMicrons / 1000000) * state.windingFormat);
+            const rollNetWeightKg = rollVolM3 * (state.materialDensity * 1000);
+
+            // 1 Roll Gross Weight (kg)
+            const rollGrossWeightKg = rollNetWeightKg + coreWeightKg;
+
+            // Print Impressions per 1 Roll
+            let impressionsRollStr = '';
+            let impressionsSingleRollExact = 0;
+            let impressionsSingleRollWhole = 0;
+
+            if (state.printStepMm > 0) {
+                impressionsSingleRollExact = ((state.length * 1000) / state.printStepMm) * state.printStreams;
+                impressionsSingleRollWhole = Math.floor((state.length * 1000) / state.printStepMm) * state.printStreams;
+                impressionsRollStr = `Оттисков (${state.printStepMm}мм): ${impressionsSingleRollWhole.toLocaleString('ru-RU')} шт (${impressionsSingleRollExact.toFixed(1)})`;
+            } else {
+                const turns = Math.round((state.diameter - coreOuterMm) / (2 * effectiveThkMm));
+                impressionsRollStr = `Витков намотки: ~${turns.toLocaleString('ru-RU')}`;
+            }
+
+            // AUTO-SELECT SCHEME IF ENABLED
+            if (state.autoSelectScheme && state.orientation === 'vert') {
+                autoSelectBestScheme();
+            }
+
+            // PALLET LAYOUT CALCULATIONS
+            const activePositions = getRollPositionsForActiveScheme();
+            const rollsPerTier = activePositions.length;
+            const totalRollsOnPallet = rollsPerTier * state.tiers;
+
+            // Pallet Dimensions & Tare
+            let totalHeightMm = 0;
+            if (state.orientation === 'vert') {
+                totalHeightMm = 145 + (state.tiers * state.widthMm) + (state.useInterlayer ? (state.tiers - 1) * 4 : 0);
+            } else {
+                // Horizontal
+                totalHeightMm = 145 + (state.tiers * state.diameter);
+            }
+
+            // Total Interlayer & Stretch weight
+            const interlayerWeight = state.useInterlayer ? (state.tiers * 0.8) : 0;
+            const wrapWeight = state.useStretchWrap ? 1.5 : 0;
+
+            const palletNetWeightTotal = totalRollsOnPallet * rollNetWeightKg;
+            const palletTareTotal = state.palletTare + (totalRollsOnPallet * coreWeightKg) + interlayerWeight + wrapWeight;
+            const palletGrossWeightTotal = palletNetWeightTotal + palletTareTotal;
+            const palletTotalAreaSqm = totalRollsOnPallet * rollAreaSqm;
+            const palletTotalMeters = totalRollsOnPallet * state.length;
+
+            const palletTotalImpressionsWhole = impressionsSingleRollWhole * totalRollsOnPallet;
+            const palletTotalImpressionsExact = impressionsSingleRollExact * totalRollsOnPallet;
+
+            // Check Limits
+            const isOverHeight = totalHeightMm > state.maxHeight;
+            const isOverWeight = palletGrossWeightTotal > state.maxGross;
+
+            // Check Overhang
+            const overhangMm = calculateMaxOverhang(activePositions);
+
+            // --- UPDATE UI TEXTS & METRICS ---
+            document.getElementById('lblCoreOuter').innerText = `${coreOuterMm} мм`;
+            document.getElementById('lblCoreWeight').innerText = `${coreWeightKg.toFixed(2)} кг`;
+
+            document.getElementById('kpiRollArea').innerText = `${rollAreaSqm.toFixed(1)} м²`;
+            document.getElementById('kpiRollWidthSub').innerText = `${state.widthMm} мм`;
+            document.getElementById('kpiRollThkSub').innerText = `${state.thicknessMicrons} мкм`;
+
+            document.getElementById('kpiRollLength').innerText = `${state.length.toLocaleString('ru-RU')} пог. м`;
+            document.getElementById('kpiRollImpressions').innerText = impressionsRollStr;
+
+            document.getElementById('kpiRollNet').innerText = `${rollNetWeightKg.toFixed(2)} кг`;
+            document.getElementById('kpiRollGross').innerText = `${rollGrossWeightKg.toFixed(2)} кг`;
+            document.getElementById('kpiRollCoreSub').innerText = `${coreWeightKg.toFixed(2)} кг`;
+
+            document.getElementById('kpiPalletRolls').innerText = `${totalRollsOnPallet} рулонов`;
+            document.getElementById('kpiPalletGross').innerText = `${Math.round(palletGrossWeightTotal).toLocaleString('ru-RU')} кг`;
+            document.getElementById('kpiPalletArea').innerText = `${Math.round(palletTotalAreaSqm).toLocaleString('ru-RU')} м²`;
+
+            document.getElementById('lbl2dStats').innerText = `Рулонов в слое: ${rollsPerTier} шт`;
+            document.getElementById('lblOverhangMm').innerText = overhangMm > 0 ? `+${overhangMm} мм (выступ)` : `0 мм (в рамках)`;
+            document.getElementById('lblOverhangMm').className = overhangMm > 0 ? "text-amber-400 font-bold" : "text-emerald-400 font-bold";
+
+            // Packing Density = (N * π * D²/4) / (L_pal * W_pal)
+            const singleRollCrossArea = (Math.PI / 4) * Math.pow(state.diameter, 2);
+            const totalRollsAreaTier = rollsPerTier * singleRollCrossArea;
+            const palletArea2D = state.palletLength * state.palletWidth;
+            const packingDensityPct = Math.min(100, (totalRollsAreaTier / palletArea2D) * 100);
+            document.getElementById('lblPackingDensity').innerText = `${packingDensityPct.toFixed(1)}%`;
+
+            document.getElementById('lblPalletDimensions').innerText = `${state.palletLength} × ${state.palletWidth} × ${totalHeightMm} мм`;
+            document.getElementById('lblPalletTotalMeters').innerText = `${palletTotalMeters.toLocaleString('ru-RU')} пог. м`;
+            document.getElementById('lblPalletImpressions').innerText = state.printStepMm > 0 ? `${palletTotalImpressionsWhole.toLocaleString('ru-RU')} шт` : `—`;
+            document.getElementById('lblPalletNetVsTare').innerText = `${Math.round(palletNetWeightTotal)} кг / ${Math.round(palletTareTotal)} кг`;
+
+            // Limit Status Badge
+            const badge = document.getElementById('badgeLimitStatus');
+            if (isOverHeight || isOverWeight) {
+                badge.className = "text-[11px] px-2 py-1 rounded font-bold text-center bg-red-100 text-red-800 border border-red-200";
+                let errs = [];
+                if (isOverHeight) errs.push(`Высота > ${state.maxHeight}мм`);
+                if (isOverWeight) errs.push(`Вес > ${state.maxGross}кг`);
+                badge.innerText = `Превышение: ${errs.join(', ')}`;
+            } else {
+                badge.className = "text-[11px] px-2 py-1 rounded font-semibold text-center bg-emerald-100 text-emerald-800 border border-emerald-200";
+                badge.innerText = "Ограничения паллеты соблюдены";
+            }
+
+            // Warning Banner for Overhang
+            const banner = document.getElementById('bannerWarning');
+            if (overhangMm > 10) {
+                banner.classList.remove('hidden');
+                banner.className = "p-3 rounded-lg border text-xs flex items-center justify-between gap-2 bg-amber-50 border-amber-200 text-amber-900";
+                document.getElementById('txtWarningMessage').innerText = `Предупреждение: Рулоны выступают за край паллеты на ${overhangMm} мм!`;
+            } else {
+                banner.classList.add('hidden');
+            }
+
+            // Recalculate Batch Order Planning
+            recalculateBatchPlanning(totalRollsOnPallet, rollNetWeightKg, rollAreaSqm, impressionsSingleRollWhole, palletGrossWeightTotal);
+
+            // Draw 2D Top View Canvas
+            draw2DCanvas(activePositions);
+
+            // Update Three.js 3D View
+            update3DScene(activePositions);
+        }
+
+        // Auto Select Best Scheme based on Roll Diameter
+        function autoSelectBestScheme() {
+            const D = state.diameter + state.rollGap;
+            const L = state.palletLength;
+            const W = state.palletWidth;
+
+            // Try standard grid counts
+            const nx = Math.floor(L / D);
+            const ny = Math.floor(W / D);
+            const gridCount = nx * ny;
+
+            if (gridCount >= 24) state.activeSchemeId = 'eur_24';
+            else if (gridCount >= 18) state.activeSchemeId = 'eur_18';
+            else if (gridCount >= 12) state.activeSchemeId = 'eur_12';
+            else if (gridCount >= 8) state.activeSchemeId = 'eur_8';
+            else if (gridCount >= 6) state.activeSchemeId = 'eur_6';
+            else if (gridCount >= 4) state.activeSchemeId = 'eur_4';
+            else if (gridCount >= 2) state.activeSchemeId = 'eur_2';
+            else state.activeSchemeId = 'eur_1';
+        }
+
+        // Generate Roll Position Coordinates (x, y) for 2D/3D rendering
+        function getRollPositionsForActiveScheme() {
+            const positions = [];
+            const D = state.diameter;
+            const R = D / 2;
+            const gap = state.rollGap;
+            const L = state.palletLength;
+            const W = state.palletWidth;
+
+            // Check if active scheme is custom
+            const custom = state.customSchemes.find(s => s.id === state.activeSchemeId);
+            if (custom && custom.positions) {
+                return custom.positions;
+            }
+
+            const preset = PRESET_SCHEMES.find(s => s.id === state.activeSchemeId) || PRESET_SCHEMES[0];
+
+            if (preset.type === 'grid') {
+                const nx = preset.nx;
+                const ny = preset.ny;
+                
+                // Center the grid on pallet
+                const totalW = (nx * D) + ((nx - 1) * gap);
+                const totalH = (ny * D) + ((ny - 1) * gap);
+                const startX = (L - totalW) / 2 + R;
+                const startY = (W - totalH) / 2 + R;
+
+                for (let iy = 0; iy < ny; iy++) {
+                    for (let ix = 0; ix < nx; ix++) {
+                        positions.push({
+                            x: startX + ix * (D + gap),
+                            y: startY + iy * (D + gap)
+                        });
+                    }
+                }
+            } else if (preset.type === 'staggered_11') {
+                // 11 rolls staggered pattern (e.g. 4-3-4)
+                const rows = [4, 3, 4];
+                const startY = (W - (3 * D)) / 2 + R;
+                rows.forEach((count, rIdx) => {
+                    const rowY = startY + rIdx * (D * 0.866);
+                    const rowW = count * D;
+                    const startX = (L - rowW) / 2 + R;
+                    for (let c = 0; c < count; c++) {
+                        positions.push({
+                            x: startX + c * D,
+                            y: rowY
+                        });
+                    }
+                });
+            } else if (preset.type === 'staggered_7') {
+                const rows = [3, 2, 2];
+                rows.forEach((count, rIdx) => {
+                    const rowY = (W / 4) * (rIdx + 1);
+                    const startX = (L - (count * D)) / 2 + R;
+                    for (let c = 0; c < count; c++) {
+                        positions.push({
+                            x: startX + c * D,
+                            y: rowY
+                        });
+                    }
+                });
+            }
+
+            return positions;
+        }
+
+        // Calculate max overhang outside pallet boundaries in mm
+        function calculateMaxOverhang(positions) {
+            let maxOverhang = 0;
+            const R = state.diameter / 2;
+            const L = state.palletLength;
+            const W = state.palletWidth;
+
+            positions.forEach(p => {
+                const minX = p.x - R;
+                const maxX = p.x + R;
+                const minY = p.y - R;
+                const maxY = p.y + R;
+
+                if (minX < 0) maxOverhang = Math.max(maxOverhang, -minX);
+                if (maxX > L) maxOverhang = Math.max(maxOverhang, maxX - L);
+                if (minY < 0) maxOverhang = Math.max(maxOverhang, -minY);
+                if (maxY > W) maxOverhang = Math.max(maxOverhang, maxY - W);
+            });
+
+            return Math.round(maxOverhang);
+        }
+
+        // --- BATCH PLANNING RECALCULATIONS ---
+        function recalculateBatchPlanning(rollsPerPallet, rollNetKg, rollSqm, rollImpressions, palletGrossKg) {
+            const vol = parseFloat(document.getElementById('inpBatchVolume').value) || 0;
+            const unit = document.getElementById('selBatchUnit').value;
+
+            let totalRollsNeeded = 0;
+
+            if (unit === 'kg') {
+                totalRollsNeeded = Math.ceil(vol / (rollNetKg || 1));
+            } else if (unit === 'rolls') {
+                totalRollsNeeded = Math.ceil(vol);
+            } else if (unit === 'meters') {
+                totalRollsNeeded = Math.ceil(vol / (state.length || 1));
+            } else if (unit === 'sqm') {
+                totalRollsNeeded = Math.ceil(vol / (rollSqm || 1));
+            } else if (unit === 'impressions') {
+                totalRollsNeeded = Math.ceil(vol / (rollImpressions || 1));
+            }
+
+            const totalMeters = totalRollsNeeded * state.length;
+            const fullPallets = Math.floor(totalRollsNeeded / (rollsPerPallet || 1));
+            const remainderRolls = totalRollsNeeded % (rollsPerPallet || 1);
+            const totalPallets = remainderRolls > 0 ? fullPallets + 1 : fullPallets;
+
+            const totalBatchGrossKg = (fullPallets * palletGrossKg) + (remainderRolls * (rollNetKg + 1)) + (remainderRolls > 0 ? state.palletTare : 0);
+            const totalBatchImpressions = totalRollsNeeded * rollImpressions;
+
+            document.getElementById('lblBatchTotalRolls').innerText = `${totalRollsNeeded.toLocaleString('ru-RU')} шт`;
+            document.getElementById('lblBatchTotalMeters').innerText = `${totalMeters.toLocaleString('ru-RU')} пог. м`;
+            
+            document.getElementById('lblBatchPalletsCount').innerText = `${totalPallets} ${getPalletDeclension(totalPallets)}`;
+            document.getElementById('lblBatchPalletBreakdown').innerText = remainderRolls > 0 ? `${fullPallets} полных + 1 сдача (${remainderRolls} рул)` : `${fullPallets} полн. паллет`;
+
+            if (remainderRolls > 0) {
+                const remainderTiers = Math.ceil(remainderRolls / (rollsPerPallet / state.tiers || 1));
+                document.getElementById('lblBatchLastPalletRolls').innerText = `${remainderRolls} рулонов (${remainderTiers} яр.)`;
+                document.getElementById('lblBatchLastPalletWeight').innerText = `Вес: ~${Math.round(remainderRolls * (rollNetKg + 0.5) + state.palletTare)} кг`;
+            } else {
+                document.getElementById('lblBatchLastPalletRolls').innerText = `Полная загрузка`;
+                document.getElementById('lblBatchLastPalletWeight').innerText = `Вес: ${Math.round(palletGrossKg)} кг`;
+            }
+
+            document.getElementById('lblBatchTotalGross').innerText = `${Math.round(totalBatchGrossKg).toLocaleString('ru-RU')} кг`;
+            document.getElementById('lblBatchTotalImpressions').innerText = state.printStepMm > 0 ? `Всего: ${totalBatchImpressions.toLocaleString('ru-RU')} отт.` : `Витков на партию`;
+        }
+
+        function getPalletDeclension(n) {
+            if (n % 10 === 1 && n % 100 !== 11) return 'паллета';
+            if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) return 'паллеты';
+            return 'паллет';
+        }
+
+        // --- 2D CANVAS DRAWING ---
+        function draw2DCanvas(positions) {
+            const canvas = document.getElementById('canvas2d');
+            const ctx = canvas.getContext('2d');
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = Math.min((canvas.width - 40) / state.palletLength, (canvas.height - 40) / state.palletWidth);
+            const offsetX = (canvas.width - (state.palletLength * scale)) / 2;
+            const offsetY = (canvas.height - (state.palletWidth * scale)) / 2;
+
+            // Draw Wooden Pallet Outline & Planks
+            ctx.fillStyle = '#1e293b'; // slate-800
+            ctx.fillRect(offsetX, offsetY, state.palletLength * scale, state.palletWidth * scale);
+
+            // Wood Planks visual lines
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            const plankW = (state.palletWidth * scale) / 5;
+            for (let i = 0; i <= 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(offsetX, offsetY + i * plankW);
+                ctx.lineTo(offsetX + state.palletLength * scale, offsetY + i * plankW);
+                ctx.stroke();
+            }
+
+            // Outer boundary
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(offsetX, offsetY, state.palletLength * scale, state.palletWidth * scale);
+
+            // Draw Rolls
+            const R_px = (state.diameter / 2) * scale;
+            const coreOuter_px = ((state.coreInner + 2 * state.coreWall) / 2) * scale;
+
+            positions.forEach((p, idx) => {
+                const cx = offsetX + p.x * scale;
+                const cy = offsetY + p.y * scale;
+
+                // Check overhang
+                const isOver = (p.x - state.diameter/2 < 0) || (p.x + state.diameter/2 > state.palletLength) ||
+                               (p.y - state.diameter/2 < 0) || (p.y + state.diameter/2 > state.palletWidth);
+
+                // Outer Roll Circle
+                ctx.beginPath();
+                ctx.arc(cx, cy, R_px, 0, Math.PI * 2);
+                ctx.fillStyle = isOver ? 'rgba(244, 63, 94, 0.85)' : 'rgba(59, 130, 246, 0.85)'; // rose-500 if over, else blue-500
+                ctx.fill();
+                ctx.strokeStyle = isOver ? '#f43f5e' : '#60a5fa';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Inner Core Circle
+                ctx.beginPath();
+                ctx.arc(cx, cy, Math.max(2, coreOuter_px), 0, Math.PI * 2);
+                ctx.fillStyle = '#0f172a'; // slate-900
+                ctx.fill();
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // Roll Number Index
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                if (R_px > 8) {
+                    ctx.fillText(idx + 1, cx, cy);
+                }
+            });
+        }
+
+        // --- THREE.JS 3D INITIALIZATION & RENDERING ---
+        function initThreeJS() {
+            const container = document.getElementById('container3d');
+            const width = container.clientWidth || 350;
+            const height = container.clientHeight || 220;
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0f172a); // slate-900
+
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+            camera.position.set(1200, 1200, 1400);
+            camera.lookAt(0, 300, 0);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Ambient & Directional Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(1000, 2000, 1000);
+            dirLight.castShadow = true;
+            scene.add(dirLight);
+
+            const fillLight = new THREE.DirectionalLight(0x3b82f6, 0.3);
+            fillLight.position.set(-1000, 800, -1000);
+            scene.add(fillLight);
+
+            // Container Groups
+            palletGroup = new THREE.Group();
+            rollGroup = new THREE.Group();
+            interlayerGroup = new THREE.Group();
+            scene.add(palletGroup);
+            scene.add(rollGroup);
+            scene.add(interlayerGroup);
+
+            // Mouse Drag Controls
+            container.addEventListener('mousedown', (e) => {
+                isMouseDown = true;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            window.addEventListener('mouseup', () => isMouseDown = false);
+
+            container.addEventListener('mousemove', (e) => {
+                if (!isMouseDown) return;
+                const deltaX = e.clientX - mouseX;
+                const deltaY = e.clientY - mouseY;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                targetRotationY += deltaX * 0.008;
+                targetRotationX += deltaY * 0.008;
+                targetRotationX = Math.max(0.1, Math.min(Math.PI / 2 - 0.05, targetRotationX));
+            });
+
+            container.addEventListener('wheel', (e) => {
+                targetZoom += e.deltaY * 1.2;
+                targetZoom = Math.max(600, Math.min(4000, targetZoom));
+            });
+
+            // Resize handle
+            window.addEventListener('resize', () => {
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            });
+
+            animate3D();
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+
+            // Smooth Orbit Camera Movement
+            const radius = targetZoom;
+            camera.position.x = radius * Math.sin(targetRotationY) * Math.cos(targetRotationX);
+            camera.position.y = radius * Math.sin(targetRotationX);
+            camera.position.z = radius * Math.cos(targetRotationY) * Math.cos(targetRotationX);
+            camera.lookAt(0, 250, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        function update3DScene(positions) {
+            // Clear previous meshes
+            while(palletGroup.children.length > 0) palletGroup.remove(palletGroup.children[0]);
+            while(rollGroup.children.length > 0) rollGroup.remove(rollGroup.children[0]);
+            while(interlayerGroup.children.length > 0) interlayerGroup.remove(interlayerGroup.children[0]);
+
+            const L = state.palletLength;
+            const W = state.palletWidth;
+            const H_pal = 145;
+
+            // 1. Build Wooden Pallet Mesh
+            const woodMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.8 }); // amber-600
+            
+            // Top Planks
+            const plankGeo = new THREE.BoxGeometry(L, 22, W / 5 - 10);
+            for (let i = 0; i < 5; i++) {
+                const plank = new THREE.Mesh(plankGeo, woodMat);
+                plank.position.set(0, H_pal - 11, -W/2 + (W/5)*(i + 0.5));
+                palletGroup.add(plank);
+            }
+
+            // Bottom blocks
+            const blockGeo = new THREE.BoxGeometry(145, 100, 145);
+            [-L/2 + 100, 0, L/2 - 100].forEach(bx => {
+                [-W/2 + 100, 0, W/2 - 100].forEach(bz => {
+                    const block = new THREE.Mesh(blockGeo, woodMat);
+                    block.position.set(bx, 50, bz);
+                    palletGroup.add(block);
+                });
+            });
+
+            // 2. Build Rolls Meshes
+            const R = state.diameter / 2;
+            const rollHeight = state.widthMm;
+            const coreR = (state.coreInner + 2 * state.coreWall) / 2;
+
+            const rollMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.3 }); // blue-500
+            const coreMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 }); // brown cardboard
+
+            if (state.orientation === 'vert') {
+                for (let tier = 0; tier < state.tiers; tier++) {
+                    const tierPosY = H_pal + (tier * rollHeight) + (rollHeight / 2) + (state.useInterlayer ? tier * 4 : 0);
+
+                    positions.forEach(p => {
+                        const rollGeo = new THREE.CylinderGeometry(R, R, rollHeight, 32);
+                        const rollMesh = new THREE.Mesh(rollGeo, rollMat);
+                        rollMesh.position.set(p.x - L/2, tierPosY, p.y - W/2);
+                        rollGroup.add(rollMesh);
+
+                        // Inner core hole visual representation
+                        const coreGeo = new THREE.CylinderGeometry(coreR, coreR, rollHeight + 2, 24);
+                        const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+                        coreMesh.position.set(p.x - L/2, tierPosY, p.y - W/2);
+                        rollGroup.add(coreMesh);
+                    });
+
+                    // Add Interlayer Cardboard Sheet
+                    if (state.useInterlayer && tier < state.tiers - 1) {
+                        const sheetGeo = new THREE.BoxGeometry(L, 4, W);
+                        const sheetMat = new THREE.MeshStandardMaterial({ color: 0xb45309 });
+                        const sheet = new THREE.Mesh(sheetGeo, sheetMat);
+                        sheet.position.set(0, H_pal + (tier + 1) * rollHeight + (tier * 4) + 2, 0);
+                        interlayerGroup.add(sheet);
+                    }
+                }
+            } else {
+                // Horizontal Orientation rendering logic
+                const horizRollMat = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.4 });
+                for (let tier = 0; tier < state.tiers; tier++) {
+                    const tierPosY = H_pal + (tier * R * 2) + R;
+                    positions.forEach(p => {
+                        const rollGeo = new THREE.CylinderGeometry(R, R, rollHeight, 32);
+                        const rollMesh = new THREE.Mesh(rollGeo, horizRollMat);
+                        rollMesh.rotation.z = Math.PI / 2;
+                        rollMesh.position.set(p.x - L/2, tierPosY, p.y - W/2);
+                        rollGroup.add(rollMesh);
+                    });
+                }
+            }
+        }
+
+        // --- RENDER SCHEMES SELECTOR CARDS ---
+        function renderSchemesGrid(filter = 'all') {
+            const grid = document.getElementById('gridSchemes');
+            grid.innerHTML = '';
+
+            let allSchemes = [...PRESET_SCHEMES, ...state.customSchemes];
+
+            if (filter === 'standard') {
+                allSchemes = allSchemes.filter(s => s.isStandard);
+            } else if (filter === 'wide') {
+                allSchemes = allSchemes.filter(s => !s.isStandard);
+            }
+
+            allSchemes.forEach(s => {
+                const isActive = s.id === state.activeSchemeId;
+                const card = document.createElement('div');
+                card.className = `cursor-pointer rounded-xl p-3 border transition flex flex-col items-center justify-between space-y-2 ${isActive ? 'bg-blue-50 border-blue-600 ring-2 ring-blue-500/20' : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100'}`;
+
+                // Mini SVG preview
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                svg.setAttribute("viewBox", "0 0 120 80");
+                svg.setAttribute("class", "w-full h-16 rounded bg-slate-900");
+
+                // Background pallet rect
+                const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                bgRect.setAttribute("x", "5");
+                bgRect.setAttribute("y", "5");
+                bgRect.setAttribute("width", "110");
+                bgRect.setAttribute("height", "70");
+                bgRect.setAttribute("fill", "#1e293b");
+                bgRect.setAttribute("stroke", "#475569");
+                svg.appendChild(bgRect);
+
+                // Sample circles
+                const tempStateActive = state.activeSchemeId;
+                state.activeSchemeId = s.id;
+                const positions = getRollPositionsForActiveScheme();
+                state.activeSchemeId = tempStateActive;
+
+                positions.forEach(p => {
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    const cx = 5 + (p.x / state.palletLength) * 110;
+                    const cy = 5 + (p.y / state.palletWidth) * 70;
+                    const r = (state.diameter / 2 / state.palletLength) * 110;
+                    circle.setAttribute("cx", cx);
+                    circle.setAttribute("cy", cy);
+                    circle.setAttribute("r", Math.max(2, r));
+                    circle.setAttribute("fill", "#3b82f6");
+                    svg.appendChild(circle);
+                });
+
+                card.appendChild(svg);
+
+                const info = document.createElement('div');
+                info.className = 'text-center';
+                info.innerHTML = `
+                    <div class="text-xs font-bold ${isActive ? 'text-blue-900' : 'text-slate-800'}">${s.name}</div>
+                    <div class="text-[10px] text-slate-500">${s.count} рулонов/слой</div>
+                `;
+                card.appendChild(info);
+
+                card.onclick = () => {
+                    state.activeSchemeId = s.id;
+                    state.autoSelectScheme = false;
+                    document.getElementById('chkAutoSelectScheme').checked = false;
+                    recalculateAll();
+                    renderSchemesGrid(filter);
+                };
+
+                grid.appendChild(card);
+            });
+        }
+
+        // --- BIND ALL EVENT LISTENERS ---
+        function bindEvents() {
+            // Inputs change events
+            document.getElementById('inpDiameter').addEventListener('input', (e) => {
+                state.diameter = parseFloat(e.target.value) || 200;
+                recalculateAll();
+            });
+
+            document.getElementById('rngDiameter').addEventListener('input', (e) => {
+                state.diameter = parseFloat(e.target.value) || 200;
+                document.getElementById('inpDiameter').value = state.diameter;
+                recalculateAll();
+            });
+
+            // Range linear ticks buttons
+            document.querySelectorAll('.tick-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const val = parseFloat(btn.getAttribute('data-val'));
+                    state.diameter = val;
+                    document.getElementById('inpDiameter').value = val;
+                    document.getElementById('rngDiameter').value = Math.min(800, Math.max(100, val));
+                    recalculateAll();
+                });
+            });
+
+            // Lock mode toggle
+            const btnLockLen = document.getElementById('btnLockLength');
+            const btnLockDia = document.getElementById('btnLockDiameter');
+            btnLockLen.addEventListener('click', () => {
+                state.lockMode = 'diameter';
+                btnLockLen.className = "px-2.5 py-1 font-medium bg-blue-600 text-white rounded-l-md border border-blue-600";
+                btnLockDia.className = "px-2.5 py-1 font-medium bg-white text-slate-700 hover:bg-slate-100 rounded-r-md border border-slate-300";
+                recalculateAll();
+            });
+            btnLockDia.addEventListener('click', () => {
+                state.lockMode = 'length';
+                btnLockDia.className = "px-2.5 py-1 font-medium bg-blue-600 text-white rounded-r-md border border-blue-600";
+                btnLockLen.className = "px-2.5 py-1 font-medium bg-white text-slate-700 hover:bg-slate-100 rounded-l-md border border-slate-300";
+                recalculateAll();
+            });
+
+            // Length input & preset buttons
+            document.getElementById('inpLength').addEventListener('input', (e) => {
+                state.length = parseFloat(e.target.value) || 1000;
+                recalculateAll();
+            });
+            document.querySelectorAll('.btn-len').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.length = parseFloat(btn.getAttribute('data-len'));
+                    document.getElementById('inpLength').value = state.length;
+                    recalculateAll();
+                });
+            });
+
+            // NEW: Print step input & preset buttons
+            document.getElementById('inpPrintStep').addEventListener('input', (e) => {
+                state.printStepMm = parseFloat(e.target.value) || 0;
+                recalculateAll();
+            });
+            document.querySelectorAll('.btn-step').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const val = parseFloat(btn.getAttribute('data-step'));
+                    state.printStepMm = val;
+                    document.getElementById('inpPrintStep').value = val;
+                    document.querySelectorAll('.btn-step').forEach(b => {
+                        b.className = "btn-step bg-white hover:bg-indigo-100 border border-indigo-200 text-[11px] px-2 py-0.5 rounded text-indigo-700";
+                    });
+                    btn.className = "btn-step bg-indigo-600 text-white font-semibold border border-indigo-600 text-[11px] px-2 py-0.5 rounded";
+                    recalculateAll();
+                });
+            });
+
+            // NEW: Streams buttons
+            document.querySelectorAll('.btn-stream').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.printStreams = parseInt(btn.getAttribute('data-stream'));
+                    document.querySelectorAll('.btn-stream').forEach(b => {
+                        b.className = "btn-stream px-2.5 py-0.5 bg-white text-indigo-800 border border-indigo-200 hover:bg-indigo-100";
+                    });
+                    btn.className = "btn-stream px-2.5 py-0.5 bg-indigo-600 text-white font-bold border border-indigo-600";
+                    recalculateAll();
+                });
+            });
+
+            // Material & Density
+            document.getElementById('selMaterial').addEventListener('change', (e) => {
+                if (e.target.value !== 'custom') {
+                    state.materialDensity = parseFloat(e.target.value);
+                    document.getElementById('inpDensity').value = state.materialDensity;
+                    recalculateAll();
+                }
+            });
+            document.getElementById('inpDensity').addEventListener('input', (e) => {
+                state.materialDensity = parseFloat(e.target.value) || 0.92;
+                document.getElementById('selMaterial').value = 'custom';
+                recalculateAll();
+            });
+
+            // Thickness & Width
+            document.getElementById('inpThickness').addEventListener('input', (e) => {
+                state.thicknessMicrons = parseFloat(e.target.value) || 50;
+                recalculateAll();
+            });
+            document.querySelectorAll('.btn-thk').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.thicknessMicrons = parseFloat(btn.getAttribute('data-thk'));
+                    document.getElementById('inpThickness').value = state.thicknessMicrons;
+                    recalculateAll();
+                });
+            });
+
+            document.getElementById('inpWidth').addEventListener('input', (e) => {
+                state.widthMm = parseFloat(e.target.value) || 500;
+                recalculateAll();
+            });
+            document.querySelectorAll('.btn-wid').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.widthMm = parseFloat(btn.getAttribute('data-wid'));
+                    document.getElementById('inpWidth').value = state.widthMm;
+                    recalculateAll();
+                });
+            });
+
+            // Format
+            document.getElementById('selFormat').addEventListener('change', (e) => {
+                state.windingFormat = parseInt(e.target.value);
+                recalculateAll();
+            });
+
+            // Cores
+            const btnC76 = document.getElementById('btnCore76');
+            const btnC152 = document.getElementById('btnCore152');
+            btnC76.addEventListener('click', () => {
+                state.coreInner = 76;
+                btnC76.className = "px-2.5 py-1 font-medium bg-blue-600 text-white rounded-l-md border border-blue-600";
+                btnC152.className = "px-2.5 py-1 font-medium bg-white text-slate-700 hover:bg-slate-100 rounded-r-md border border-slate-300";
+                recalculateAll();
+            });
+            btnC152.addEventListener('click', () => {
+                state.coreInner = 152;
+                btnC152.className = "px-2.5 py-1 font-medium bg-blue-600 text-white rounded-r-md border border-blue-600";
+                btnC76.className = "px-2.5 py-1 font-medium bg-white text-slate-700 hover:bg-slate-100 rounded-l-md border border-slate-300";
+                recalculateAll();
+            });
+
+            document.getElementById('inpCoreWall').addEventListener('input', (e) => {
+                state.coreWall = parseFloat(e.target.value) || 8;
+                recalculateAll();
+            });
+            document.getElementById('inpCoreDensity').addEventListener('input', (e) => {
+                state.coreDensity = parseFloat(e.target.value) || 0.72;
+                recalculateAll();
+            });
+
+            // Pallet select
+            document.getElementById('selPalletSize').addEventListener('change', (e) => {
+                const parts = e.target.value.split('x');
+                state.palletLength = parseInt(parts[0]);
+                state.palletWidth = parseInt(parts[1]);
+                state.palletTare = parseInt(parts[2]);
+                document.getElementById('inpPalletTare').value = state.palletTare;
+                recalculateAll();
+                renderSchemesGrid();
+            });
+
+            // Orientations
+            const btnVert = document.getElementById('btnOrientVert');
+            const btnHoriz = document.getElementById('btnOrientHoriz');
+            const horizSub = document.getElementById('horizSubOptions');
+
+            btnVert.addEventListener('click', () => {
+                state.orientation = 'vert';
+                btnVert.className = "py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 border-emerald-600 bg-emerald-50 text-emerald-700";
+                btnHoriz.className = "py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 border-slate-300 bg-white text-slate-600 hover:bg-slate-50";
+                horizSub.classList.add('hidden');
+                recalculateAll();
+            });
+
+            btnHoriz.addEventListener('click', () => {
+                state.orientation = 'horiz';
+                btnHoriz.className = "py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 border-emerald-600 bg-emerald-50 text-emerald-700";
+                btnVert.className = "py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 border-slate-300 bg-white text-slate-600 hover:bg-slate-50";
+                horizSub.classList.remove('hidden');
+                recalculateAll();
+            });
+
+            // Roll Gap
+            document.getElementById('inpRollGap').addEventListener('input', (e) => {
+                state.rollGap = parseFloat(e.target.value) || 0;
+                recalculateAll();
+            });
+            document.querySelectorAll('.btn-gap').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.rollGap = parseFloat(btn.getAttribute('data-gap'));
+                    document.getElementById('inpRollGap').value = state.rollGap;
+                    recalculateAll();
+                });
+            });
+
+            // Tiers
+            document.getElementById('btnTierMinus').addEventListener('click', () => {
+                if (state.tiers > 1) {
+                    state.tiers--;
+                    document.getElementById('inpTiers').value = state.tiers;
+                    recalculateAll();
+                }
+            });
+            document.getElementById('btnTierPlus').addEventListener('click', () => {
+                state.tiers++;
+                document.getElementById('inpTiers').value = state.tiers;
+                recalculateAll();
+            });
+            document.getElementById('inpTiers').addEventListener('input', (e) => {
+                state.tiers = parseInt(e.target.value) || 1;
+                recalculateAll();
+            });
+
+            // Max Limits & Max Tier Calc
+            document.getElementById('btnMaxTiers').addEventListener('click', () => {
+                // Calculate max allowed tiers without exceeding max height & weight
+                let testTiers = 1;
+                while (testTiers < 20) {
+                    const h = 145 + (testTiers * state.widthMm);
+                    if (h > state.maxHeight) break;
+                    testTiers++;
+                }
+                state.tiers = Math.max(1, testTiers - 1);
+                document.getElementById('inpTiers').value = state.tiers;
+                recalculateAll();
+            });
+
+            document.getElementById('inpMaxHeight').addEventListener('input', (e) => {
+                state.maxHeight = parseFloat(e.target.value) || 1800;
+                recalculateAll();
+            });
+            document.getElementById('inpMaxGross').addEventListener('input', (e) => {
+                state.maxGross = parseFloat(e.target.value) || 1000;
+                recalculateAll();
+            });
+
+            // Checkboxes
+            document.getElementById('chkInterlayer').addEventListener('change', (e) => {
+                state.useInterlayer = e.target.checked;
+                recalculateAll();
+            });
+            document.getElementById('chkStretchWrap').addEventListener('change', (e) => {
+                state.useStretchWrap = e.target.checked;
+                recalculateAll();
+            });
+            document.getElementById('chkAutoSelectScheme').addEventListener('change', (e) => {
+                state.autoSelectScheme = e.target.checked;
+                recalculateAll();
+            });
+
+            // 3D Camera Presets
+            document.querySelectorAll('.btn-cam').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const mode = btn.getAttribute('data-cam');
+                    if (mode === '3d') {
+                        targetRotationX = 0.4; targetRotationY = -0.6;
+                    } else if (mode === 'front') {
+                        targetRotationX = 0.05; targetRotationY = 0;
+                    } else if (mode === 'side') {
+                        targetRotationX = 0.05; targetRotationY = Math.PI / 2;
+                    } else if (mode === 'top') {
+                        targetRotationX = Math.PI / 2 - 0.01; targetRotationY = 0;
+                    }
+                });
+            });
+
+            // Fix scheme button
+            document.getElementById('btnFixScheme').addEventListener('click', () => {
+                state.autoSelectScheme = true;
+                document.getElementById('chkAutoSelectScheme').checked = true;
+                autoSelectBestScheme();
+                recalculateAll();
+                renderSchemesGrid();
+            });
+
+            // Batch planning inputs
+            document.getElementById('inpBatchVolume').addEventListener('input', () => recalculateAll());
+            document.getElementById('selBatchUnit').addEventListener('change', () => recalculateAll());
+            document.querySelectorAll('.btn-vol').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('inpBatchVolume').value = btn.getAttribute('data-vol');
+                    document.getElementById('selBatchUnit').value = btn.getAttribute('data-unit');
+                    recalculateAll();
+                });
+            });
+
+            // Scheme filter tabs
+            document.querySelectorAll('#schemeFilterTabs button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#schemeFilterTabs button').forEach(b => {
+                        b.className = "px-2.5 py-1 rounded-md font-medium text-slate-600 hover:text-slate-900";
+                    });
+                    btn.className = "px-2.5 py-1 rounded-md font-semibold bg-white shadow-sm text-slate-800";
+                    renderSchemesGrid(btn.getAttribute('data-filter'));
+                });
+            });
+
+            // Modal Controls
+            document.getElementById('btnOpenModal').addEventListener('click', openCustomSchemeModal);
+            document.getElementById('btnEditCustomScheme').addEventListener('click', openCustomSchemeModal);
+            document.getElementById('btnCloseModal').addEventListener('click', closeCustomSchemeModal);
+            document.getElementById('btnCancelModal').addEventListener('click', closeCustomSchemeModal);
+            document.getElementById('btnSaveCustomScheme').addEventListener('click', saveCustomSchemeFromModal);
+
+            // Reset button
+            document.getElementById('btnReset').addEventListener('click', () => {
+                state.diameter = 235;
+                state.length = 1000;
+                state.printStepMm = 250;
+                state.printStreams = 1;
+                state.thicknessMicrons = 50;
+                state.widthMm = 500;
+                state.tiers = 3;
+                state.rollGap = 0;
+                state.activeSchemeId = 'eur_24';
+                document.getElementById('inpDiameter').value = 235;
+                document.getElementById('rngDiameter').value = 235;
+                document.getElementById('inpLength').value = 1000;
+                document.getElementById('inpPrintStep').value = 250;
+                document.getElementById('inpThickness').value = 50;
+                document.getElementById('inpWidth').value = 500;
+                document.getElementById('inpTiers').value = 3;
+                document.getElementById('inpRollGap').value = 0;
+                recalculateAll();
+                renderSchemesGrid();
+            });
+        }
+
+        // --- CUSTOM SCHEME MODAL LOGIC & INTERACTIVE CANVAS ---
+        function openCustomSchemeModal() {
+            document.getElementById('modalScheme').classList.remove('hidden');
+            document.getElementById('modalCanvasSize').innerText = `${state.palletLength} × ${state.palletWidth} мм`;
+
+            // Load current positions into modal
+            const currentPos = getRollPositionsForActiveScheme();
+            modalRolls = JSON.parse(JSON.stringify(currentPos));
+            selectedModalRollIndex = -1;
+
+            initModalCanvas();
+            drawModalCanvas();
+        }
+
+        function closeCustomSchemeModal() {
+            document.getElementById('modalScheme').classList.add('hidden');
+        }
+
+        function initModalCanvas() {
+            const canvas = document.getElementById('modalCanvas');
+            
+            canvas.onmousedown = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+
+                const scale = Math.min((canvas.width - 20) / state.palletLength, (canvas.height - 20) / state.palletWidth);
+                const offsetX = (canvas.width - (state.palletLength * scale)) / 2;
+                const offsetY = (canvas.height - (state.palletWidth * scale)) / 2;
+
+                const R_px = (state.diameter / 2) * scale;
+
+                // Find clicked roll
+                selectedModalRollIndex = -1;
+                modalRolls.forEach((r, idx) => {
+                    const cx = offsetX + r.x * scale;
+                    const cy = offsetY + r.y * scale;
+                    const dist = Math.hypot(mx - cx, my - cy);
+                    if (dist <= R_px) {
+                        selectedModalRollIndex = idx;
+                        isDraggingModalRoll = true;
+                    }
+                });
+
+                drawModalCanvas();
+            };
+
+            canvas.onmousemove = (e) => {
+                if (!isDraggingModalRoll || selectedModalRollIndex === -1) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+
+                const scale = Math.min((canvas.width - 20) / state.palletLength, (canvas.height - 20) / state.palletWidth);
+                const offsetX = (canvas.width - (state.palletLength * scale)) / 2;
+                const offsetY = (canvas.height - (state.palletWidth * scale)) / 2;
+
+                // Convert canvas pixel coords back to pallet mm coords
+                let newX = (mx - offsetX) / scale;
+                let newY = (my - offsetY) / scale;
+
+                // Clamp inside pallet borders with snapping
+                const R = state.diameter / 2;
+                newX = Math.max(R, Math.min(state.palletLength - R, newX));
+                newY = Math.max(R, Math.min(state.palletWidth - R, newY));
+
+                modalRolls[selectedModalRollIndex].x = newX;
+                modalRolls[selectedModalRollIndex].y = newY;
+
+                drawModalCanvas();
+            };
+
+            window.onmouseup = () => {
+                isDraggingModalRoll = false;
+            };
+
+            window.onkeydown = (e) => {
+                if (selectedModalRollIndex !== -1 && (e.key === 'Delete' || e.key === 'Backspace')) {
+                    modalRolls.splice(selectedModalRollIndex, 1);
+                    selectedModalRollIndex = -1;
+                    drawModalCanvas();
+                }
+            };
+
+            // Modal Controls
+            document.getElementById('btnClearModalRolls').onclick = () => {
+                modalRolls = [];
+                selectedModalRollIndex = -1;
+                drawModalCanvas();
+            };
+
+            document.getElementById('btnAddSingleRoll').onclick = () => {
+                modalRolls.push({
+                    x: state.palletLength / 2,
+                    y: state.palletWidth / 2
+                });
+                drawModalCanvas();
+            };
+
+            document.getElementById('btnGenerateGrid').onclick = () => {
+                const nx = parseInt(document.getElementById('inpGridNx').value) || 4;
+                const ny = parseInt(document.getElementById('inpGridNy').value) || 3;
+                modalRolls = [];
+                const D = state.diameter;
+                const R = D / 2;
+                const gap = state.rollGap;
+                const startX = (state.palletLength - (nx * D + (nx - 1) * gap)) / 2 + R;
+                const startY = (state.palletWidth - (ny * D + (ny - 1) * gap)) / 2 + R;
+
+                for (let iy = 0; iy < ny; iy++) {
+                    for (let ix = 0; ix < nx; ix++) {
+                        modalRolls.push({
+                            x: startX + ix * (D + gap),
+                            y: startY + iy * (D + gap)
+                        });
+                    }
+                }
+                drawModalCanvas();
+            };
+        }
+
+        function drawModalCanvas() {
+            const canvas = document.getElementById('modalCanvas');
+            const ctx = canvas.getContext('2d');
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const scale = Math.min((canvas.width - 20) / state.palletLength, (canvas.height - 20) / state.palletWidth);
+            const offsetX = (canvas.width - (state.palletLength * scale)) / 2;
+            const offsetY = (canvas.height - (state.palletWidth * scale)) / 2;
+
+            // Pallet Outline
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(offsetX, offsetY, state.palletLength * scale, state.palletWidth * scale);
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(offsetX, offsetY, state.palletLength * scale, state.palletWidth * scale);
+
+            // Rolls
+            const R_px = (state.diameter / 2) * scale;
+            modalRolls.forEach((r, idx) => {
+                const cx = offsetX + r.x * scale;
+                const cy = offsetY + r.y * scale;
+                const isSelected = idx === selectedModalRollIndex;
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, R_px, 0, Math.PI * 2);
+                ctx.fillStyle = isSelected ? '#f59e0b' : '#3b82f6'; // amber if selected, blue otherwise
+                ctx.fill();
+                ctx.strokeStyle = isSelected ? '#ffffff' : '#93c5fd';
+                ctx.lineWidth = isSelected ? 2.5 : 1;
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '10px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(idx + 1, cx, cy);
+            });
+
+            document.getElementById('modalRollCount').innerText = `${modalRolls.length} шт`;
+        }
+
+        function saveCustomSchemeFromModal() {
+            const name = document.getElementById('inpSchemeName').value || 'Моя схема';
+            const newSchemeId = 'custom_' + Date.now();
+
+            const customObj = {
+                id: newSchemeId,
+                name: `${name} (${modalRolls.length} рул)`,
+                count: modalRolls.length,
+                positions: modalRolls,
+                isStandard: false
+            };
+
+            state.customSchemes.push(customObj);
+            saveCustomSchemesToStorage();
+
+            state.activeSchemeId = newSchemeId;
+            state.autoSelectScheme = false;
+            document.getElementById('chkAutoSelectScheme').checked = false;
+
+            closeCustomSchemeModal();
+            recalculateAll();
+            renderSchemesGrid();
+        }
+    </script>
+</body>
+</html>
