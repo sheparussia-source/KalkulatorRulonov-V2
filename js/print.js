@@ -37,11 +37,8 @@ function fillPrintCard(calc) {
     set('printTiers', String(state.tiers));
     set('printTotalRolls', calc.totalRollsOnPallet + ' шт');
 
-    const pack = packingLines(calc);
-    set('printPackPallets', pack.pallets);
-    set('printPackInterlayers', pack.interlayers);
-    set('printPackStretch', pack.stretch);
-    set('printPackCores', pack.cores);
+    const printCompare = document.getElementById('printComparison');
+    if (printCompare) printCompare.innerHTML = comparisonPrintHtml(calc);
 }
 
 function printCalculationCard() {
