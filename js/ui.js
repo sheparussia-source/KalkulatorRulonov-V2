@@ -1022,7 +1022,8 @@ function updateUI(skipLengthInputSync = false, skipWeightInputSync = false) {
         const streamTag = state.printStreams > 1 ? ` ×${state.printStreams}р` : '';
         if (impLabelEl) impLabelEl.textContent = `Оттисков (${state.printStepMm}мм${streamTag}):`;
         if (impValEl) {
-            impValEl.textContent = `${calc.impPerRoll.wholeCount.toLocaleString('ru-RU')} шт (${calc.impPerRoll.exactCount.toFixed(1)})`;
+            const exact = calc.impPerRoll.exactCount.toLocaleString('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            impValEl.textContent = `${calc.impPerRoll.wholeCount.toLocaleString('ru-RU')} шт (${exact})`;
         }
         if (detImpEl) {
             detImpEl.textContent = `${calc.totalPalletImpressionsWhole.toLocaleString('ru-RU')} шт (${Math.round(calc.totalPalletImpressionsExact).toLocaleString('ru-RU')} точн.)`;
@@ -1144,15 +1145,13 @@ function setPrintStep(stepVal) {
 
 function selectPrintStreams(streamsCount) {
     state.printStreams = Math.max(1, Math.min(12, parseInt(streamsCount, 10) || 1));
-    [1, 2, 3, 4].forEach(n => {
+    for (let n = 1; n <= 12; n++) {
         const btn = document.getElementById('btnStreams_' + n);
-        if (!btn) return;
-        if (n === state.printStreams) {
-            btn.className = 'px-2.5 py-0.5 rounded-md font-semibold bg-sky-600 text-white text-[11px] transition cursor-pointer';
-        } else {
-            btn.className = 'px-2.5 py-0.5 rounded-md font-medium text-slate-600 hover:text-slate-900 text-[11px] transition cursor-pointer';
-        }
-    });
+        if (!btn) continue;
+        btn.className = n === state.printStreams
+            ? 'py-0.5 rounded font-semibold bg-sky-600 text-white text-[11px] cursor-pointer'
+            : 'py-0.5 rounded font-medium text-slate-600 hover:text-slate-900 text-[11px] cursor-pointer';
+    }
     updateUI();
 }
 
@@ -2071,6 +2070,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const raw = String(el.value).trim();
             if (raw === '' && opts.emptyIsZero) {
                 opts.onValid(0);
+                if (kind === 'change') el.value = '0';
                 return;
             }
             if (kind === 'input' && numberStillTyping(el.value)) return;
@@ -2084,6 +2084,8 @@ window.addEventListener('DOMContentLoaded', () => {
             if (kind === 'change' || negative || bareZero) {
                 if (opts.capHigh && Number.isFinite(v) && maxOf() != null && v > maxOf()) {
                     accept(v, kind);
+                    const shown = opts.display();
+                    if (shown !== '' && shown != null) el.value = shown;
                     return;
                 }
                 revert();
