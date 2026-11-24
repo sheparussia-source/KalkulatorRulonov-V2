@@ -115,6 +115,82 @@
             background-color: #eff6ff;
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
         }
+
+        /* Печатная карточка одного расчета. На экране ее нет, в PDF остается только она. */
+        .print-sheet {
+            display: none;
+        }
+        .print-sheet h1 {
+            margin: 0 0 18px;
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+        .print-sheet h2 {
+            margin: 16px 0 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+        .print-sheet h2:first-of-type {
+            margin-top: 0;
+        }
+        .print-sheet dl {
+            margin: 0;
+        }
+        .print-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 16px;
+            padding: 3px 0;
+            font-size: 14px;
+            line-height: 1.35;
+        }
+        .print-row dt {
+            color: #475569;
+        }
+        .print-row dd {
+            margin: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            text-align: right;
+        }
+        @media print {
+            @page {
+                size: A4;
+                margin: 16mm;
+            }
+            html, body {
+                background: #fff !important;
+                color: #0f172a !important;
+                min-height: 0 !important;
+                height: auto !important;
+            }
+            body {
+                display: block !important;
+            }
+            header,
+            main,
+            #customSchemeModal {
+                display: none !important;
+            }
+            .print-sheet {
+                display: block !important;
+                width: 100%;
+                max-width: 460px;
+                margin: 0;
+                color: #0f172a;
+                background: #fff;
+            }
+            .print-sheet [hidden] {
+                display: none !important;
+            }
+        }
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -155,6 +231,7 @@
                     </svg>
                     <span>Добавить свой вариант укладки</span>
                 </button>
+                <button type="button" id="btnPrintPdf" onclick="printCalculationCard()" class="inline-flex items-center px-3 py-2 rounded-lg text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer" title="Печать карточки расчета">PDF</button>
                 <button type="button" id="btnResetDefaults" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer" title="Сбросить параметры к стандартным">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
@@ -1096,6 +1173,38 @@
             </div>
         </div>
     </div>
+
+    <article id="printCard" class="print-sheet" aria-hidden="true">
+        <h1>Карточка расчета</h1>
+        <section>
+            <h2>Рулон</h2>
+            <dl>
+                <div class="print-row"><dt>Длина</dt><dd id="printLength"></dd></div>
+                <div class="print-row"><dt>Ширина</dt><dd id="printWidth"></dd></div>
+                <div class="print-row"><dt>Толщина</dt><dd id="printThickness"></dd></div>
+                <div class="print-row"><dt>Диаметр</dt><dd id="printDiameter"></dd></div>
+                <div class="print-row"><dt>Площадь</dt><dd id="printArea"></dd></div>
+                <div class="print-row"><dt>Нетто</dt><dd id="printNet"></dd></div>
+                <div class="print-row"><dt>Брутто</dt><dd id="printGross"></dd></div>
+            </dl>
+        </section>
+        <section id="printImpressionBlock" hidden>
+            <h2>Оттиск</h2>
+            <dl>
+                <div class="print-row"><dt>Размер</dt><dd id="printImpressionSize"></dd></div>
+                <div class="print-row"><dt>В рулоне</dt><dd id="printImpressionFit"></dd></div>
+            </dl>
+        </section>
+        <section>
+            <h2>Паллета</h2>
+            <dl>
+                <div class="print-row"><dt>Тип</dt><dd id="printPalletType"></dd></div>
+                <div class="print-row"><dt id="printRollsPerLayerLabel">В ярусе</dt><dd id="printRollsPerLayer"></dd></div>
+                <div class="print-row"><dt>Ярусов</dt><dd id="printTiers"></dd></div>
+                <div class="print-row"><dt>Всего рулонов</dt><dd id="printTotalRolls"></dd></div>
+            </dl>
+        </section>
+    </article>
     <script>
         /***********************************************************************
          * 0. ТОЧНАЯ ЛИНЕЙНАЯ ШКАЛА ВНЕШНЕГО ДИАМЕТРА РУЛОНА (D)
@@ -1550,6 +1659,52 @@
                 ? 'В рулоне ' + countText + ', остаток ' + formatImpressionRemainderMm(fit.remainderMm) + ' мм'
                 : 'В рулоне ' + countText;
             el.hidden = false;
+        }
+
+        function fillPrintCard(calc) {
+            if (!document.getElementById('printCard')) return;
+            if (!calc) calc = calculateAll();
+            const set = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            };
+
+            set('printLength', formatRollMeters(calc.lengthMeters) + ' пог. м');
+            set('printWidth', state.rollWidth + ' мм');
+            const layerNote = calc.layers > 1 ? ' × ' + calc.layers + ' сл.' : '';
+            set('printThickness', state.thicknessMicrons + ' мкм' + layerNote);
+            set('printDiameter', calc.D + ' мм');
+            set('printArea', calc.areaSqM.toFixed(1) + ' м²');
+            set('printNet', calc.netWeightKg.toFixed(2) + ' кг');
+            set('printGross', calc.grossWeightKg.toFixed(2) + ' кг');
+
+            const fit = countImpressionsInRoll(calc.lengthMeters, state.impressionSizeMm);
+            const block = document.getElementById('printImpressionBlock');
+            if (block) block.hidden = !fit;
+            if (fit) {
+                set('printImpressionSize', String(state.impressionSizeMm) + ' мм');
+                const countText = fit.whole.toLocaleString('ru-RU') + ' шт';
+                set('printImpressionFit', fit.remainderMm > 0
+                    ? countText + ', остаток ' + formatImpressionRemainderMm(fit.remainderMm) + ' мм'
+                    : countText);
+            }
+
+            const pallet = PALLET_DIMENSIONS[state.palletType];
+            set('printPalletType', pallet ? pallet.name : '');
+            const perLayerLabel = document.getElementById('printRollsPerLayerLabel');
+            if (perLayerLabel) {
+                perLayerLabel.textContent = (state.orientation === 'horizontal' && state.horizStackType === 'pyramid')
+                    ? 'В нижнем ярусе'
+                    : 'В ярусе';
+            }
+            set('printRollsPerLayer', calc.rollsPerTier + ' шт');
+            set('printTiers', String(state.tiers));
+            set('printTotalRolls', calc.totalRollsOnPallet + ' шт');
+        }
+
+        function printCalculationCard() {
+            fillPrintCard();
+            window.print();
         }
 
         function positiveOr(value, fallback) {
@@ -2667,6 +2822,7 @@
             drawTopViewCanvas(calc);
             drawSideViewCanvas(calc);
             renderSchemeCards();
+            fillPrintCard(calc);
         }
 
         /***********************************************************************
@@ -4171,8 +4327,10 @@
             saveCustomScheme,
             autoSelectBestScheme,
             triggerOptimalScheme,
-            set3DCameraPreset
+            set3DCameraPreset,
+            printCalculationCard
         });
+        window.addEventListener('beforeprint', () => fillPrintCard());
     </script>
 </body>
 </html>
