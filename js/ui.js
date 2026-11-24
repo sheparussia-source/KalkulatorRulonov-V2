@@ -84,9 +84,7 @@ const state = {
     interlayerThickMm: 4,
     interlayerWeightKg: 0.8,
     stretchWrapWeightKg: 1.5,
-    interlayersPerPallet: 3,
-    stretchPerPallet: 1.5,
-    stretchUnit: 'kg',
+    packPrices: { pallet: 120, sheet: 3, stretch: 10, core: 1.1 },
     batchOrderValue: 3000,
     batchOrderUnit: 'kg',
     activeSchemeId: 'std_18',
@@ -920,63 +918,17 @@ function renderPiecesInRoll(lengthMeters) {
     el.hidden = !text;
 }
 
-function renderPacking(calc) {
-    const lines = packingLines(calc);
-    const set = (id, text) => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = text;
-    };
-    set('packPallets', lines.pallets);
-    set('packInterlayers', lines.interlayers);
-    set('packStretch', lines.stretch);
-    set('packCores', lines.cores);
-}
-
 function updateBatchCalculationUI(calc) {
-    const totalRollsNeeded = rollsForBatch(calc);
+    const batch = computeBatch(calc);
+    const totalRollsNeeded = batch.totalRollsNeeded;
+    const rollsPerPallet = batch.rollsPerPallet;
+    const totalPallets = batch.totalPallets;
+    const fullPallets = batch.fullPallets;
+    const remainderRolls = batch.remainderRolls;
 
-    const rollsPerPallet = Math.max(1, calc.totalRollsOnPallet);
-    const totalPallets = totalRollsNeeded > 0 ? Math.ceil(totalRollsNeeded / rollsPerPallet) : 0;
-    const fullPallets = totalRollsNeeded > 0 ? Math.floor(totalRollsNeeded / rollsPerPallet) : 0;
-    const remainderRolls = totalRollsNeeded % rollsPerPallet;
-
-    const actualNetKg = totalRollsNeeded * calc.netWeightKg;
-    const actualLengthM = totalRollsNeeded * calc.lengthMeters;
-    const actualImpressionsWhole = totalRollsNeeded * calc.impPerRoll.wholeCount;
-
-    let lastPalletRolls = remainderRolls === 0 ? (totalRollsNeeded > 0 ? rollsPerPallet : 0) : remainderRolls;
-    let lastPalletTiers = 0;
-    let lastPalletSheets = 0;
-    let lastPalletHeightMm = 0;
-
-    if (lastPalletRolls > 0) {
-        for (let t = 1; t <= state.tiers; t++) {
-            const st = calculatePalletStructureForTiers(t, calc.D, calc.B, state.rollGap);
-            if (st.totalRollsOnPallet >= lastPalletRolls || t === state.tiers) {
-                lastPalletTiers = t;
-                lastPalletSheets = st.sheetsPerPallet;
-                lastPalletHeightMm = st.totalHeightMm;
-                break;
-            }
-        }
-    }
-
-    const lastPalletGrossKg = lastPalletRolls > 0
-        ? (lastPalletRolls * calc.grossWeightKg + state.palletWoodWeight + (state.useInterlayer ? lastPalletSheets * state.interlayerWeightKg + state.stretchWrapWeightKg : 0))
-        : 0;
-
-    const totalSheetsAllPallets = state.useInterlayer
-        ? (fullPallets * calc.sheetsPerPallet + (remainderRolls > 0 ? lastPalletSheets : 0))
-        : 0;
-    const totalWrapAllPallets = state.useInterlayer ? totalPallets * state.stretchWrapWeightKg : 0;
-    const totalBatchGrossKg = totalRollsNeeded * calc.grossWeightKg
-        + totalPallets * state.palletWoodWeight
-        + totalSheetsAllPallets * (state.useInterlayer ? state.interlayerWeightKg : 0)
-        + totalWrapAllPallets;
-
-    document.getElementById('batchActualNetKg').textContent = `${actualNetKg.toFixed(1)} кг нетто (${Math.round(actualLengthM * calc.layers * (state.rollWidth / 1000)).toLocaleString('ru-RU')} м²)`;
+    document.getElementById('batchActualNetKg').textContent = `${batch.actualNetKg.toFixed(1)} кг нетто (${Math.round(batch.actualLengthM * calc.layers * (state.rollWidth / 1000)).toLocaleString('ru-RU')} м²)`;
     document.getElementById('batchTotalRolls').textContent = totalRollsNeeded.toLocaleString('ru-RU');
-    document.getElementById('batchTotalLengthSub').textContent = `${Math.round(actualLengthM).toLocaleString('ru-RU')} пог. м`;
+    document.getElementById('batchTotalLengthSub').textContent = `${Math.round(batch.actualLengthM).toLocaleString('ru-RU')} пог. м`;
 
     document.getElementById('batchTotalPallets').textContent = totalPallets.toLocaleString('ru-RU');
     if (remainderRolls > 0 && fullPallets > 0) {
@@ -990,16 +942,16 @@ function updateBatchCalculationUI(calc) {
     if (remainderRolls === 0 && totalPallets > 0) {
         document.getElementById('batchLastPalletRolls').textContent = `Полная (${rollsPerPallet} шт)`;
     } else if (remainderRolls > 0) {
-        document.getElementById('batchLastPalletRolls').textContent = `${remainderRolls} из ${rollsPerPallet} рул. (${lastPalletTiers} яр.)`;
+        document.getElementById('batchLastPalletRolls').textContent = `${remainderRolls} из ${rollsPerPallet} рул. (${batch.lastPalletTiers} яр.)`;
     } else {
         document.getElementById('batchLastPalletRolls').textContent = `—`;
     }
-    document.getElementById('batchLastPalletSpecs').textContent = `Вес: ${Math.round(lastPalletGrossKg)} кг | Выс: ${lastPalletHeightMm} мм`;
+    document.getElementById('batchLastPalletSpecs').textContent = `Вес: ${Math.round(batch.lastPalletGrossKg)} кг | Выс: ${batch.lastPalletHeightMm} мм`;
 
-    document.getElementById('batchTotalGrossKg').textContent = Math.round(totalBatchGrossKg).toLocaleString('ru-RU');
-    const imprSuffix = state.printStepMm > 0 ? ` | Отт: ${actualImpressionsWhole.toLocaleString('ru-RU')}` : '';
-    document.getElementById('batchConsumablesSub').textContent = `Шпуль: ${totalRollsNeeded} шт | Листов: ${totalSheetsAllPallets} л.${imprSuffix}`;
-    renderPacking(calc);
+    document.getElementById('batchTotalGrossKg').textContent = Math.round(batch.totalBatchGrossKg).toLocaleString('ru-RU');
+    const imprSuffix = state.printStepMm > 0 ? ` | Отт: ${batch.actualImpressionsWhole.toLocaleString('ru-RU')}` : '';
+    document.getElementById('batchConsumablesSub').textContent = `Шпуль: ${totalRollsNeeded} шт | Листов: ${batch.totalSheetsAllPallets} л.${imprSuffix}`;
+    renderComparison(calc, batch);
 }
 
 function updateUI(skipLengthInputSync = false, skipWeightInputSync = false) {
@@ -2039,6 +1991,8 @@ function saveCustomScheme() {
 window.addEventListener('DOMContentLoaded', () => {
     buildDiameterScaleTicks();
     initSchemes();
+    loadSavedCalcs();
+    loadPackPrices();
 
     const inputRollDiam = document.getElementById('inputRollDiam');
     const sliderRollDiam = document.getElementById('sliderRollDiam');
@@ -2373,36 +2327,67 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    bindCheckedNumber(document.getElementById('inputInterlayersPerPallet'), {
+    bindCheckedNumber(document.getElementById('pricePallet'), {
         min: 0,
-        max: 100,
-        integer: true,
+        max: 1000000,
         allowZero: true,
         emptyIsZero: true,
         capHigh: true,
-        display: () => state.interlayersPerPallet,
+        display: () => state.packPrices.pallet,
         onValid: (v) => {
-            state.interlayersPerPallet = v > 0 ? v : 0;
+            state.packPrices.pallet = v > 0 ? v : 0;
+            persistPackPrices();
             updateUI();
         }
     });
 
-    bindCheckedNumber(document.getElementById('inputStretchPerPallet'), {
+    bindCheckedNumber(document.getElementById('priceSheet'), {
         min: 0,
-        max: 100,
+        max: 1000000,
         allowZero: true,
         emptyIsZero: true,
         capHigh: true,
-        display: () => state.stretchPerPallet,
+        display: () => state.packPrices.sheet,
         onValid: (v) => {
-            state.stretchPerPallet = v > 0 ? v : 0;
+            state.packPrices.sheet = v > 0 ? v : 0;
+            persistPackPrices();
             updateUI();
         }
     });
 
-    document.getElementById('selectStretchUnit').addEventListener('change', (e) => {
-        state.stretchUnit = e.target.value === 'm' ? 'm' : 'kg';
-        updateUI();
+    bindCheckedNumber(document.getElementById('priceStretch'), {
+        min: 0,
+        max: 1000000,
+        allowZero: true,
+        emptyIsZero: true,
+        capHigh: true,
+        display: () => state.packPrices.stretch,
+        onValid: (v) => {
+            state.packPrices.stretch = v > 0 ? v : 0;
+            persistPackPrices();
+            updateUI();
+        }
+    });
+
+    bindCheckedNumber(document.getElementById('priceCore'), {
+        min: 0,
+        max: 1000000,
+        allowZero: true,
+        emptyIsZero: true,
+        capHigh: true,
+        display: () => state.packPrices.core,
+        onValid: (v) => {
+            state.packPrices.core = v > 0 ? v : 0;
+            persistPackPrices();
+            updateUI();
+        }
+    });
+
+    document.getElementById('btnSaveComparison').addEventListener('click', saveCurrentCalc);
+    document.getElementById('compareTableBody').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-delete-calc]');
+        if (!btn) return;
+        deleteSavedCalc(btn.getAttribute('data-delete-calc'));
     });
 
     bindCheckedNumber(document.getElementById('inputBatchValue'), {
@@ -2463,9 +2448,6 @@ window.addEventListener('DOMContentLoaded', () => {
         state.interlayerThickMm = 4;
         state.interlayerWeightKg = 0.8;
         state.stretchWrapWeightKg = 1.5;
-        state.interlayersPerPallet = 3;
-        state.stretchPerPallet = 1.5;
-        state.stretchUnit = 'kg';
         state.batchOrderValue = 3000;
         state.batchOrderUnit = 'kg';
         state.autoSelectScheme = true;
@@ -2489,9 +2471,6 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('inputSheetThickness').value = 4;
         document.getElementById('inputSheetWeight').value = 0.8;
         document.getElementById('inputWrapWeight').value = 1.5;
-        document.getElementById('inputInterlayersPerPallet').value = 3;
-        document.getElementById('inputStretchPerPallet').value = 1.5;
-        document.getElementById('selectStretchUnit').value = 'kg';
         document.getElementById('inputBatchValue').value = 3000;
         document.getElementById('selectBatchUnit').value = 'kg';
         document.getElementById('chkAutoScheme').checked = true;
